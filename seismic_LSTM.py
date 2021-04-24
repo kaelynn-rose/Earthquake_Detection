@@ -17,7 +17,7 @@ import tensorflow as tf
 from tensorflow.keras import layers
 keras = tf.keras
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score, precision_score, recall_score, mean_squared_error
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
@@ -26,11 +26,13 @@ from joblib import Parallel,delayed
 
 from scipy import signal
 from scipy.signal import resample,hilbert
+from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 
 
 # get envelopes
 dataset = np.load(dataset_path,allow_pickle=True)
 counter = 0
+envelopes = []
 for i in range(0,len(dataset)):
     counter += 1
     print(f'Working on trace # {counter}')
@@ -44,9 +46,9 @@ for i in range(0,len(dataset)):
     rolling_average = rolling_obj.mean()
     rolling_average_demeaned = rolling_average[199:] - np.mean(rolling_average[199:])
     rolling_average_padded = np.pad(rolling_average_demeaned,(199,0),'constant',constant_values=(list(rolling_average_demeaned)[0])) # pad with zeros to remove nans created by rolling mean
-    resamp = signal.resample(rolling_average_padded, 300) # resample signal from 6000 samples to 300
+    resamp = signal.resample(rolling_average_padded, 1000) # resample signal from 6000 samples to 300
     envelopes.append(resamp)
-np.save('envelopes100k.npy',envelopes)
+np.save('envelopes100k1000samples.npy',envelopes)
 
 
 
@@ -95,16 +97,17 @@ class ClassificationLSTM:
         model = keras.Sequential()
         model.add(keras.layers.SimpleRNN(64, input_shape=(1,self.X_train.shape[2]), return_sequences=True))
         model.add(keras.layers.LSTM(64, input_shape=(1,self.X_train.shape[2]), return_sequences=True))
+        model.add(keras.layers.Dropout(0.2))
         model.add(keras.layers.LSTM(32, return_sequences=False))
         model.add(keras.layers.Dense(16, activation='relu'))
         model.add(keras.layers.Dense(1, activation='sigmoid'))
-        opt = keras.optimizers.Adam(learning_rate=1e-6)
+        opt = keras.optimizers.Adam(learning_rate=4e-5)
         model.compile(optimizer=opt,
                       loss='binary_crossentropy', metrics=metric)
  
         # fit and predict
         self.model = model
-        self.history = model.fit(self.X_train, self.y_train, batch_size=batch_size,epochs=self.epochs,callbacks=callbacks,validation_split=0.2)
+        self.history = model.fit(self.X_train, self.y_train, batch_size=batch_size, epochs=self.epochs,callbacks=callbacks,validation_split=0.2)
         
         # plot train/test accuracy history
         plt.style.use('ggplot')
@@ -160,10 +163,10 @@ envelopes_path = 'envelopes100k.npy'
 label_csv_path = 'partial_signal_df100000.csv'
 
 # use ClassificationLSTM
-model_c1 = ClassificationLSTM(envelopes_path,label_csv_path,'trace_category')
-model_c1.train_test_split(test_size=0.25,random_state=44)
-model_c1.LSTM_fit(epochs=1,metric='accuracy',batch_size=32)
-model_c1.LSTM_evaluate()
+model_c2 = ClassificationLSTM(envelopes_path,label_csv_path,'trace_category')
+model_c2.train_test_split(test_size=0.25,random_state=44)
+model_c2.LSTM_fit(epochs=50,metric='accuracy',batch_size=64)
+model_c2.LSTM_evaluate()
 
 
 
@@ -217,10 +220,12 @@ class RegressionLSTM:
         model = keras.Sequential()
         model.add(keras.layers.LSTM(32, input_shape=(1, 300), return_sequences=True))
         model.add(keras.layers.LSTM(32, return_sequences=False))
+        model.add(keras.layers.Dropout(0.2))
         model.add(keras.layers.Dense(32, activation='relu'))
         model.add(keras.layers.Dense(16, activation='relu'))
         model.add(keras.layers.Dense(1, activation='linear'))
-        model.compile(optimizer='rmsprop',
+        opt = keras.optimizers.Adam(learning_rate=1e-4)
+        model.compile(optimizer=opt,
                       loss='mse')
         self.model = model
         
@@ -253,25 +258,25 @@ class RegressionLSTM:
         print(f'Test data loss: {test_loss}')
 
         # save model
-        saved_model_path = f'./saved_models/LSTM_regression_acc{accuracy}_prec{precision}_rec{recall}_epochs{self.epochs}_{format(datetime.now().strftime("%Y%m%d"))}' # _%H%M%S
+        saved_model_path = f'./saved_models/LSTM_regression_loss{test_loss}_epochs{self.epochs}_{format(datetime.now().strftime("%Y%m%d"))}' # _%H%M%S
         # Save entire model to a HDF5 file
         self.model.save(saved_model_path)
         
         plt.style.use('ggplot')
         fig, ax = plt.subplots(figsize=(7,7))
-        ax.scatter(self.y_test,self.y_pred,alpha=0.2)
+        ax.scatter(self.y_test,self.y_pred,alpha=0.05)
         point1 = [0,0]
-        point2 = [3500,3500]
+        point2 = [1200,1200]
         xvalues = [point1[0], point2[0]]
         yvalues = [point1[1], point2[1]]
         ax.plot(xvalues,yvalues,color='blue')
         ax.set_ylabel('Predicted Value',fontsize=14)
         ax.set_xlabel('Observed Value',fontsize=14)
-        ax.set_title(f'Regression LSTM Results 10k dataset S-Wave | ({epochs} self.epochs)',fontsize=16)
+        ax.set_title(f'Regression LSTM Results S-Wave Arrival Times | ({self.epochs} epochs)',fontsize=14)
         ax.tick_params(axis='x', labelsize=14)
         ax.tick_params(axis='y', labelsize=14)
-        ax.set_xlim([0,3500])
-        ax.set_ylim([0,3500])
+        ax.set_xlim([0,1200])
+        ax.set_ylim([0,1200])
         plt.tight_layout()
         plt.savefig('true_vs_predicted.png')
         plt.show()
@@ -285,5 +290,118 @@ label_csv_path = 'partial_signal_df100000.csv'
 # use RegressionLSTM
 model_r1 = RegressionLSTM(envelopes_path,label_csv_path,'p_arrival_sample')
 model_r1.train_test_split(test_size=0.25,random_state=44)
-model_r1.LSTM_fit(epochs=1,batch_size=32)
+model_r1.LSTM_fit(epochs=50,batch_size=32)
 model_r1.LSTM_evaluate()
+
+
+# p-wave
+plt.style.use('ggplot')
+fig, ax = plt.subplots(figsize=(7,7))
+ax.scatter(model_r1.y_test,model_r1.y_pred,alpha=0.01)
+point1 = [0,0]
+point2 = [1200,1200]
+xvalues = [point1[0], point2[0]]
+yvalues = [point1[1], point2[1]]
+ax.plot(xvalues,yvalues,color='blue')
+ax.set_ylabel('Predicted Value',fontsize=14)
+ax.set_xlabel('Observed Value',fontsize=14)
+ax.set_title(f'Regression LSTM Results S-Wave Arrival Times | (50 epochs)',fontsize=14)
+ax.tick_params(axis='x', labelsize=14)
+ax.tick_params(axis='y', labelsize=14)
+ax.set_xlim([200,1200])
+ax.set_ylim([200,1200])
+plt.tight_layout()
+plt.savefig('true_vs_predicted.png')
+plt.show()
+
+# s-wave
+plt.style.use('ggplot')
+fig, ax = plt.subplots(figsize=(7,7))
+ax.scatter(model_r1.y_test,model_r1.y_pred,alpha=0.05)
+point1 = [0,0]
+point2 = [5000,5000]
+xvalues = [point1[0], point2[0]]
+yvalues = [point1[1], point2[1]]
+ax.plot(xvalues,yvalues,color='blue')
+ax.set_ylabel('Predicted Value',fontsize=14)
+ax.set_xlabel('Observed Value',fontsize=14)
+ax.set_title(f'Regression LSTM Results S-Wave Arrival Times | (50 epochs)',fontsize=14)
+ax.tick_params(axis='x', labelsize=14)
+ax.tick_params(axis='y', labelsize=14)
+ax.set_xlim([0,5000])
+ax.set_ylim([0,5000])
+plt.tight_layout()
+plt.savefig('true_vs_predicted.png')
+plt.show()
+
+
+
+
+
+
+
+
+
+# grid search
+
+def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
+                       model, param_grid, cv=10, scoring_fit='neg_mean_squared_error',
+                       do_probabilities = False):
+    gs = GridSearchCV(
+        estimator=model,
+        param_grid=param_grid,
+        cv=cv,
+        n_jobs=-2,
+        scoring=scoring_fit,
+        verbose=2
+    )
+    fitted_model = gs.fit(X_train_data, y_train_data)
+    
+    if do_probabilities:
+      pred = fitted_model.predict_proba(X_test_data)
+    else:
+      pred = fitted_model.predict(X_test_data)
+    
+    return fitted_model, pred
+  
+  
+  
+envelopes = np.load(envelopes_path,allow_pickle=True)
+label_csv = pd.read_csv(label_csv_path)
+labels = label_csv['trace_category']
+labels = np.array(labels.map(lambda x: 1 if x == 'earthquake_local' else 0))
+    
+X_train, X_test, y_train, y_test = train_test_split(envelopes, labels,random_state = 44,test_size=0.25) # train test split
+X_train = np.reshape(X_train, (np.array(X_train).shape[0], 1, np.array(X_train).shape[1]))
+X_test = np.reshape(X_test, (np.array(X_test).shape[0], 1, np.array(X_test).shape[1]))
+X_train.shape, X_test.shape, y_train.shape, y_test.shape
+    
+
+def build_LSTM(epochs=10,dropout_rate=0.2,optimizer='Adam',batch_size=32,activation='relu'):
+
+    # model design
+    model = keras.Sequential()
+    model.add(keras.layers.SimpleRNN(64, input_shape=(1,X_train.shape[2]), return_sequences=True))
+    model.add(keras.layers.LSTM(64, input_shape=(1,X_train.shape[2]), return_sequences=True))
+    model.add(keras.layers.Dropout(dropout_rate))
+    model.add(keras.layers.LSTM(32, return_sequences=False))
+    model.add(keras.layers.Dense(16, activation=activation))
+    model.add(keras.layers.Dense(1, activation='sigmoid'))
+    model.compile(optimizer=optimizer,
+                  loss='binary_crossentropy', metrics='accuracy')
+
+    return model
+
+param_grid = {'epochs':[10,50],
+              'dropout_rate':[0.2,0.5],
+              'optimizer':['Adam','Rmsprop'],
+              'batch_size':[8,16,32,64],
+              'activation':['relu','sigmoid','tanh']
+              }
+
+# fit and predict
+model = KerasClassifier(build_fn = build_LSTM, verbose=1)
+model, pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid, cv=5, scoring_fit='neg_log_loss')
+
+print(model.best_score_)
+print(model.best_params_)
