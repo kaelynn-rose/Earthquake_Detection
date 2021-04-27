@@ -78,9 +78,13 @@ Here are examples of earthquake and noise waveforms that were used to train the 
 The spectrogram images were labeled with values of 'earthquake' or 'noise'. I created and tested a classifying convolutional neural network model on a subset of 100,000 randomly chosen images from the set, using the _seismic_CNN.py_ script in this repo. The script first imports the 100,000 randomly chosen images from the directory, performs a train-test split, compiles and then fits a classification cnn model, and then evaluates and saves the model and produces evaluation figures so model performance can be inspected visually. The model uses callbacks to save the partially-trained model at the end of each epoch.
 
 ```
-Baseline model: The accuracy of the baseline model for earthquake vs. noise prediction is is 0.53704, the precision is 0.6359130766298132, and the recall is 0.6322173089071383
+Baseline model: The accuracy of the baseline model for earthquake vs. noise
+prediction is is 0.53704, the precision is 0.6359130766298132, and the recall is
+0.6322173089071383
 
-Best model: The accuracy of the classification model for earthquake vs. noise prediction is 0.98532, the precision is 0.9907954040500222, and the recall is 0.9859759949463045
+Best model: The accuracy of the classification model for earthquake vs. noise
+prediction is 0.98532, the precision is 0.9907954040500222, and the recall is
+0.9859759949463045
 
 ```
 
@@ -230,3 +234,109 @@ A plot comparing the observed and predicted **s-wave** arrival sample times is s
 The model loss history for p-wave arrival sample:
 
 ![plot](./Figures/CNN_regression_magnitude_history.png) 
+
+
+
+## LSTM - Signal Envelopes
+
+To try to remove the need to create and store signal images in order to train a model, I created two types of LSTM models, which are a type of recursive neural network (RNN) model designed specifically to mitigate the exploding gradient problem common with RNNs. 
+
+Preliminary testing showed that the 6000 sample signals were too long and too noisy for the LSTM to predict well. So, the following technique was used to convert the signals to a more usable format:
+
+1. Used the _get_signal_traces.py_ script in this repo to fetch 100,000 randomly selected raw signal data traces
+2. Used the _seismic_LSTM.py_ script to 1-50 Hz bandpass filter each signal, apply a Hilbert transform to get the positive signal envelope, calculate the 2-second rolling mean of the envelope, and resample the envelope to 300 samples from 6000
+3. Used the signal envelopes to train the classification and regression LSTM models
+4. Used the _LSTM_grid_search.py_ script to find optimal hyperparameters using a grid search method
+
+
+
+## Classification LSTM - 'Earthquake' or 'Noise' Prediction
+
+Using the method described above, I created and tested a classifying LSTM model on a subset of 100,000 randomly chosen images from the set, using the _seismic_LSTM.py_ script in this repo. The script performs a train-test split, compiles and then fits a classification LSTM model, and then evaluates and saves the model and produces evaluation figures so model performance can be inspected visually. The model uses callbacks to save the partially-trained model at the end of each epoch.
+
+```
+Baseline model: The accuracy of the baseline model for earthquake vs. noise
+prediction is is 0.52164, the precision is 0.5996003996003996, and the recall is
+0.5988824585910996
+
+Best model: The accuracy of the classification model for earthquake vs. noise
+prediction is 0.97412, the precision is 0.9774326297623789, and the recall is
+0.979578261158784
+
+```
+
+The best LSTM Classification model had the following structure:
+
+```
+
+
+
+```
+
+For the use case of using this model to detect earthquakes in near-real-time, we would want to have a balance between minimizing false negatives and false positives so that we could classify earthquakes correctly but also not classify every noise signal as an earthquake. For this case, the most important metric would be accuracy since it gives us the proportion of true positives and true negatives identified by the model.
+
+Evaluating the test set produced the following confusion matrix:
+
+![plot](./Figures/LSTM_classifier_confusion_matrix.png) 
+
+
+The plot below shows the model accuracy history over 50 epochs:
+
+![plot](./Figures/LSTM_classifier_accuracy_history.png) 
+
+
+## Regression LSTM - Earthquake Magnitude, P-Wave, and S-Wave Prediction
+
+Using the method described above, I created and tested a regression LSTM model on a subset of 100,000 randomly chosen images from the set, using the _seismic_LSTM.py_ script in this repo. The script performs a train-test split, compiles and then fits a regression LSTM model, and then evaluates and saves the model and produces evaluation figures so model performance can be inspected visually. The model uses callbacks to save the partially-trained model at the end of each epoch.
+
+**LSTM Magnitude Prediction**
+```
+Baseline model: The baseline mse for earthquake magnitude is 0.9567373607639829 
+
+Best model: The mse of the LSTM regression for earthquake magnitude is 0.38736453652381897 
+
+```
+The plot below shows the model accuracy history over 50 epochs:
+
+![plot](./Figures/LSTM_regression_magnitude_history.png) 
+
+![plot](./Figures/LSTM_regression_magnitude_predicted.png) 
+
+
+**LSTM P-Wave Arrival Time Prediction**
+```
+Baseline model: The baseline mse for p-wave time prediction is 30772.70156806433  
+
+Best model: The mse of the LSTM regression for p-wave time prediction is 3212.234619140625 
+
+```
+
+The plot below shows the model accuracy history over 50 epochs:
+
+![plot](./Figures/LSTM_regression_pwave_history.png) 
+
+![plot](./Figures/LSTM_regression_pwave_predicted.png) 
+
+
+**LSTM S-Wave Arrival Time Prediction**
+```
+Baseline model: The baseline mse for s-wave time prediction is 366620.90600771894
+
+Best model: The mse of the LSTM regression for s-wave time prediction is 42508.578125 
+
+```
+The plot below shows the model accuracy history over 50 epochs:
+
+![plot](./Figures/LSTM_regression_swave_history.png) 
+
+![plot](./Figures/LSTM_regression_swave_predicted.png) 
+
+
+
+The best LSTM Regression model had the following structure:
+
+```
+
+
+
+```
