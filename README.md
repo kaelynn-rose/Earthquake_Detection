@@ -187,9 +187,9 @@ Best model: The mse of the CNN regression for earthquake magnitude is 0.15895192
 **S-Wave Prediction**
 
 ```
-Baseline model: The baseline mse for earthquake magnitude is 0.9501049752369152 
+Baseline model: The baseline mse for s-wave arrival time is 364874.65796900255 
 
-Best model: The mse of the CNN regression for earthquake magnitude is 0.15895192325115204 
+Best model: The mse of the CNN regression for s-wave arrival time is 25648.94921875 
 
 ```
 
@@ -221,19 +221,19 @@ _________________________________________________________________
 
 A plot comparing the observed and predicted **p-wave** arrival sample times is shown here:
 
-![plot](./Figures/CNN_regression_magnitude.png) 
+![plot](./Figures/CNN_regression_pwave.png) 
 
 The model loss history for p-wave arrival sample:
 
-![plot](./Figures/CNN_regression_magnitude_history.png) 
+![plot](./Figures/CNN_regression_pwave_history.png) 
 
 A plot comparing the observed and predicted **s-wave** arrival sample times is shown here:
 
-![plot](./Figures/CNN_regression_magnitude.png) 
+![plot](./Figures/CNN_regression_swave.png) 
 
 The model loss history for p-wave arrival sample:
 
-![plot](./Figures/CNN_regression_magnitude_history.png) 
+![plot](./Figures/CNN_regression_swave_history.png) 
 
 
 
@@ -336,8 +336,26 @@ The plot below shows the model accuracy history over 50 epochs:
 The best LSTM Regression model had the following structure:
 
 ```
-
-
+Model: "sequential_9"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+lstm_4 (LSTM)                (None, 1, 32)             42624     
+_________________________________________________________________
+lstm_5 (LSTM)                (None, 32)                8320      
+_________________________________________________________________
+dropout_9 (Dropout)          (None, 32)                0         
+_________________________________________________________________
+dense_24 (Dense)             (None, 32)                1056      
+_________________________________________________________________
+dense_25 (Dense)             (None, 16)                528       
+_________________________________________________________________
+dense_26 (Dense)             (None, 1)                 17        
+=================================================================
+Total params: 52,545
+Trainable params: 52,545
+Non-trainable params: 0
+_________________________________________________________________
 
 ```
 
@@ -389,6 +407,7 @@ I selected the Hawaiian Volcano Observatory ("HV") network because it has statio
 
 Whenever the SeedLink client in the _live_data.py_ script recieves a signal trace, it checks to see if there are more than 9 traces (~6500 samples/ about 1 minute). If there are more than 9 traces, it creates an image using the first 9 traces, and then removes the first 3 traces from the list. In this way, it creates images with a moving time window of 20 seconds, so that there is a new image created every 20 seconds. It uploads each image to the s3 bucket using boto3, which triggers the Lambda function. The Lambda function predicts the class of the seismic signal in the image, and prints the results to the AWS CloudWatch console. 
 
+
 #### Example Earthquakes Recorded and Predicted by Lambda
 
 I ran the _live_data.py_ script overnight, and recorded some earthquakes at Kilauea. Here is a screenshot from the Lambda console showing the usage metrics:
@@ -396,12 +415,15 @@ I ran the _live_data.py_ script overnight, and recorded some earthquakes at Kila
 ![plot](./Figures/Lambda_logs.png) 
 
 
-Here is a screenshot of earthquakes recorded by the USGS at Kilauea, and an example of how the Lambda function was used to run the CNN model and correctly predict these as earthquakes. Look at the top two most recent earthquakes:
+Here is a screenshot of earthquakes recorded by the USGS at Kilauea, and an example of how the Lambda function was used to run the CNN model and correctly predict these as earthquakes. Look at the top two most recent earthquakes, indicated in red:
+
 
 ![plot](./Figures/Kilauea_earthquakes_USGS.png) 
 
 
-And finally, here is a screenshot of the CloudWatch logs predicting the class of each image from 4/27/2021 at times 17:51:46 to 18:15:02 (UTC). Both of the most recent earthquakes at Kilauea are shown correctly predicted at the right times, and all other images are correctly labeled as noise.
+And finally, here is a screenshot of the CloudWatch logs predicting the class of each image from 4/27/2021 at times 17:51:46 to 18:15:02 (UTC). Both of the most recent earthquakes at Kilauea indicated in red on the Kilauea figure are shown correctly predicted at the right times, and all other images are correctly labeled as noise.
+
+![plot](./Figures/Lambda_cloudwatch1.png) 
 
 Here is a slideshow video showing the spectrograms of the two earthquakes which were correctly predicted and verified as having occurred by USGS. The mostly black spectrogram images are noise, and the appearance of a light-colored pulse indicates an earthquake:
 
