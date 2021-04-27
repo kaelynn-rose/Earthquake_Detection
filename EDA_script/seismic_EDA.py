@@ -40,22 +40,25 @@ plt.style.use('ggplot')
 
 ###################### USER INPUT ####################
 
+datapath = '/Users/kaelynnrose/Saved_Documents/Documents/GALVANIZE/Capstones/Capstone_2/'
+
+
 # paths to csv and hdf5 (waveform/signal) files
-noise_csv_path = 'data/chunk1/chunk1.csv'
-noise_sig_path = 'data/chunk1/chunk1.hdf5'
-eq1_csv_path = 'data/chunk2/chunk2.csv'
-eq1_sig_path = 'data/chunk2/chunk2.hdf5'
-eq2_csv_path = 'data/chunk3/chunk3.csv'
-eq2_sig_path = 'data/chunk3/chunk3.hdf5'
-eq3_csv_path = 'data/chunk4/chunk4.csv'
-eq3_sig_path = 'data/chunk4/chunk4.hdf5'
-eq4_csv_path = 'data/chunk5/chunk5.csv'
-eq4_sig_path = 'data/chunk5/chunk5.hdf5'
-eq5_csv_path = 'data/chunk6/chunk6.csv'
-eq5_sig_path = 'data/chunk6/chunk6.hdf5'
+noise_csv_path = datapath + 'data/chunk1/chunk1.csv'
+noise_sig_path = datapath + 'data/chunk1/chunk1.hdf5'
+eq1_csv_path = datapath + 'data/chunk2/chunk2.csv'
+eq1_sig_path = datapath + 'data/chunk2/chunk2.hdf5'
+eq2_csv_path = datapath + 'data/chunk3/chunk3.csv'
+eq2_sig_path = datapath + 'data/chunk3/chunk3.hdf5'
+eq3_csv_path = datapath + 'data/chunk4/chunk4.csv'
+eq3_sig_path = datapath + 'data/chunk4/chunk4.hdf5'
+eq4_csv_path = datapath + 'data/chunk5/chunk5.csv'
+eq4_sig_path = datapath + 'data/chunk5/chunk5.hdf5'
+eq5_csv_path = datapath + 'data/chunk6/chunk6.csv'
+eq5_sig_path = datapath + 'data/chunk6/chunk6.hdf5'
 
 # directory to pull images from
-dir = 'images/big_data_random/specs'
+dir = '/Users/kaelynnrose/Saved_Documents/Documents/GALVANIZE/Capstones/Capstone_2/images/big_data_random/waves_long'
 
 ###################### END USER INPUT ####################
 
@@ -144,7 +147,7 @@ def plot_mags_depths_distance():
     depths = [float(x) for x in depths if x != 'None'] # get the earthquake source depths
 
     # plot
-    plt.style.use('seaborn-pastel')
+    plt.style.use('ggplot')
     fig, (ax1,ax2,ax3) = plt.subplots(1,3,figsize=(16,5))
     ax1.hist(img_dataset['source_magnitude'],bins=100) # plot earthquake source magnitude
     ax1.set_xlabel('Earthquake Magnitude',fontsize=14)
@@ -161,7 +164,7 @@ def plot_mags_depths_distance():
     ax3.set_title('Earthquake Distance',fontsize=18)
     ax3.set_xlim([-10, 250])
     plt.savefig('mags_depths_distances.png',dpi=500)
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.show()
 
 # test the plotting function
@@ -268,3 +271,52 @@ def eq_vs_noise_plot():
 # use this plotting function
 eq_vs_noise_plot()
 
+### Figure 5: example plot of earthquake signals vs. noise signals being used to train the CNN
+
+def eq_vs_noise_waveforms_plot():
+    dtfl = h5py.File(eq1_sig_path, 'r')
+    dataset1 = dtfl.get('data/'+str(eq1_list[8021])) # select a random trace name from the list
+    # waveforms, 3 channels: first row: E channel, second row: N channel, third row: Z channel
+    data1 = np.array(dataset1)
+
+    dtf2 = h5py.File(eq2_sig_path, 'r')
+    dataset2 = dtf2.get('data/'+str(eq2_list[8020])) # select a random trace name from the list
+    # waveforms, 3 channels: first row: E channel, second row: N channel, third row: Z channel
+    data2 = np.array(dataset2)
+
+    dtf3 = h5py.File(eq3_sig_path, 'r')
+    dataset3 = dtf3.get('data/'+str(eq3_list[155555])) # select a random trace name from the list
+    # waveforms, 3 channels: first row: E channel, second row: N channel, third row: Z channel
+    data3 = np.array(dataset3)
+
+    dtf4 = h5py.File(noise_sig_path, 'r')
+    dataset4 = dtf4.get('data/'+str(noise_list[6524])) # select a random trace name from the list
+    # waveforms, 3 channels: first row: E channel, second row: N channel, third row: Z channel
+    data4 = np.array(dataset4)
+
+    dtf5 = h5py.File(noise_sig_path, 'r')
+    dataset5 = dtf5.get('data/'+str(noise_list[8111])) # select a random trace name from the list
+    # waveforms, 3 channels: first row: E channel, second row: N channel, third row: Z channel
+    data5 = np.array(dataset5)
+
+    dtf6 = h5py.File(noise_sig_path, 'r')
+    dataset6 = dtf6.get('data/'+str(noise_list[9333])) # select a random trace name from the list
+    # waveforms, 3 channels: first row: E channel, second row: N channel, third row: Z channel
+    data6 = np.array(dataset6)
+
+    fig, axs = plt.subplots(2,3,figsize=(12,8))
+    datasets = [dataset1,dataset2,dataset3,dataset4,dataset5,dataset6]
+    datas = [data1,data2,data3,data4,data5,data6]
+    titles = ['earthquake','earthquake','earthquake','noise','noise','noise']
+    for i, ax in enumerate(axs.flatten()):
+        im = ax.plot(np.linspace(0,60,6000),data[:,2],color='k',linewidth=1)
+        ax.set_ylabel('Amplitude (Pa)',fontsize=12)
+        ax.set_xlabel('Time (s)',fontsize=12)
+        ax.set_title(titles[i],fontsize=14)
+
+    plt.tight_layout()
+    plt.savefig('earthquakes_vs_noise_waveforms.png')
+    plt.show()
+
+# use this plotting function
+eq_vs_noise_waveforms_plot()
