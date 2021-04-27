@@ -359,10 +359,12 @@ To deploy the best classification model, the CNN classifier, I used AWS Lambda s
 7. Created a Lambda function using the Dockerized container image on the AWS Lambda console
 8. Connected the s3 bucket to the Lambda function so that whenver an object is uploaded to the s3 bucket, it triggers the Lambda function to run the model
 
+
 Here's an overview of this method from the AWS website:
 ![plot](./Figures/Lambda_process1.png) 
 
-A detailed map of this method:
+
+A detailed map showing how the method utilizes s3, ECR, Lambda, and CloudWatch:
 ![plot](./Figures/Lambda_process2.png) 
 
 
@@ -386,7 +388,6 @@ client.run()
 I selected the Hawaiian Volcano Observatory ("HV") network because it has stations located on Kilauea volcano in Hawaii. These stations detect many earthquake signals per day, because Kilauea has an active magma plumbing system that generates a greater number of earthquakes compared to a regular tectonic fault system. I selected the 'EHZ' channel, which is an extremely short-period, high-gain seismometer with a vertical orientation (like the train/test data used to fit and evaluate the model). 
 
 Whenever the SeedLink client in the _live_data.py_ script recieves a signal trace, it checks to see if there are more than 9 traces (~6500 samples/ about 1 minute). If there are more than 9 traces, it creates an image using the first 9 traces, and then removes the first 3 traces from the list. In this way, it creates images with a moving time window of 20 seconds, so that there is a new image created every 20 seconds. It uploads each image to the s3 bucket using boto3, which triggers the Lambda function. The Lambda function predicts the class of the seismic signal in the image, and prints the results to the AWS CloudWatch console. 
-
 
 
 
