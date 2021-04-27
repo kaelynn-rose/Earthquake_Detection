@@ -73,102 +73,160 @@ Since the p-wave and s-wave arrival times can be quite close together at the sca
 Here are examples of earthquake and noise waveforms that were used to train the CNN p-wave and s-wave prediction models:
 ![plot](./Figures/example_waveforms.png) 
 
-## Classification CNN
+## Classification CNN - 'Earthquake' or 'Noise' Prediction
 
-The spectrogram images were labeled with values of 'earthquake' or 'noise'. I created and tested a classifying convolutional neural network model on a subset of 200,000 randomly chosen images from the set, using the "earthquake_cnn.py" script in this repo. The script first imports the 200,000 randomly chosen images from the directory, performs a train-test split, compiles and then fits a classification cnn model, and then evaluates and saves the model and produces evaluation figures so model performance can be inspected visually. The model uses callbacks to save the partially-trained model at the end of each epoch.
+The spectrogram images were labeled with values of 'earthquake' or 'noise'. I created and tested a classifying convolutional neural network model on a subset of 100,000 randomly chosen images from the set, using the _seismic_CNN.py_ script in this repo. The script first imports the 100,000 randomly chosen images from the directory, performs a train-test split, compiles and then fits a classification cnn model, and then evaluates and saves the model and produces evaluation figures so model performance can be inspected visually. The model uses callbacks to save the partially-trained model at the end of each epoch.
 
-Baseline model: Earthquakes were the larger class, with 63.33% of the signals being earthquake signals. Using a sklearn's DummyClassifier with the 'stratified' strategy of generating predictions, this gives us a baseline precision of 0.633, a baseline accuracy of 0.534, and a baseline recall of 0.635.
+```
+Baseline model: The accuracy of the baseline model for earthquake vs. noise prediction is is 0.53704, the precision is 0.6359130766298132, and the recall is 0.6322173089071383
+
+Best model: The accuracy of the classification model for earthquake vs. noise prediction is 0.98532, the precision is 0.9907954040500222, and the recall is 0.9859759949463045
+
+```
 
 The best model had the following CNN structure:
 
 ```
-Model: "sequential_1"
+Model: "sequential_19"
 _________________________________________________________________
 Layer (type)                 Output Shape              Param #   
 =================================================================
-conv2d_2 (Conv2D)            (None, 100, 150, 32)      832       
+conv2d_6 (Conv2D)            (None, 100, 150, 32)      832       
 _________________________________________________________________
-max_pooling2d_2 (MaxPooling2 (None, 50, 75, 32)        0         
+max_pooling2d_6 (MaxPooling2 (None, 50, 75, 32)        0         
 _________________________________________________________________
-dropout_1 (Dropout)          (None, 50, 75, 32)        0         
+dropout_24 (Dropout)         (None, 50, 75, 32)        0         
 _________________________________________________________________
-flatten_1 (Flatten)          (None, 120000)            0         
+flatten_6 (Flatten)          (None, 120000)            0         
 _________________________________________________________________
-dense_3 (Dense)              (None, 16)                1920016   
+dense_54 (Dense)             (None, 64)                7680064   
 _________________________________________________________________
-dropout_2 (Dropout)          (None, 16)                0         
+dense_55 (Dense)             (None, 16)                1040      
 _________________________________________________________________
-dense_4 (Dense)              (None, 10)                170       
+dense_56 (Dense)             (None, 2)                 34        
 =================================================================
-Total params: 1,921,018
-Trainable params: 1,921,018
+Total params: 7,681,970
+Trainable params: 7,681,970
 Non-trainable params: 0
 _________________________________________________________________
 ```
-
-The best model had the following metrics when predicting on the test set:
-* Accuracy: 0.9848
-* Precision: 0.9840
-* Recall: 0.9921
 
 For the use case of using this model to detect earthquakes in near-real-time, we would want to have a balance between minimizing false negatives and false positives so that we could classify earthquakes correctly but also not classify every noise signal as an earthquake. For this case, the most important metric would be accuracy since it gives us the proportion of true positives and true negatives identified by the model.
 
 Evaluating the test set produced the following confusion matrix:
 
-![plot](./figures/confusion_matrix.png) 
-
-The model predictions were then evaluated, and the best and worse performing images are shown here:
-
-![plot](./figures/earthquakes_vs_noise.png) 
-
-The plot below shows the model accuracy history over 15 epochs:
-
-![plot](./figures/accuracy_history.png) 
+![plot](./Figures/CNN_classifier_confusion_matrix.png) 
 
 
-## Regression CNN
+The plot below shows the model accuracy history over 50 epochs:
 
-For the regression CNN, I used 200,000 spectrogram images and the target variable of earthquake magnitude. I created and tested a regression convolutional neural network model on the 200,000 image set, using the "earthquake_cnn.py" script in this repo. The script first imports the 200,000 randomly chosen images from the directory, performs a train-test split, compiles and then fits a regression cnn model using the specified target, and then evaluates and saves the model and produces evaluation figures. The model uses callbacks to save the partially-trained model at the end of each epoch.
+![plot](./Figures/CNN_classifier_accuracy_history.png) 
 
-Baseline model: The baseline model is the mean of the source magnitudes in the input dataset, so a predicted magnitude of 1.5215, which would give us a baseline MSE of 0.9497.  
+
+## Regression CNN - Earthquake Magnitude Prediction
+
+For the regression CNN, I used 100,000 spectrogram images and the target variable of earthquake magnitude. I created and tested a regression convolutional neural network model on the 100,000 image set, using the _seismic_CNN.py_ script in this repo. The script first imports the 100,000 randomly chosen images from the directory, performs a train-test split, compiles and then fits a regression cnn model using the specified target, and then evaluates and saves the model and produces evaluation figures. The model uses callbacks to save the partially-trained model at the end of each epoch.
 
 ```
-Model: "sequential"
+Baseline model: The baseline mse for earthquake magnitude is 0.9501049752369152 
+
+Best model: The mse of the CNN regression for earthquake magnitude is 0.15895192325115204 
+
+```
+
+The best model had the following structure:
+```
+Model: "sequential_1"
 _________________________________________________________________
 Layer (type)                 Output Shape              Param #   
 =================================================================
-conv2d (Conv2D)              (None, 100, 150, 32)      832       
+conv2d_1 (Conv2D)            (None, 100, 150, 64)      1664      
 _________________________________________________________________
-max_pooling2d (MaxPooling2D) (None, 50, 75, 32)        0         
+max_pooling2d_1 (MaxPooling2 (None, 50, 75, 64)        0         
 _________________________________________________________________
-conv2d_1 (Conv2D)            (None, 48, 73, 64)        18496     
+dropout_1 (Dropout)          (None, 50, 75, 64)        0         
 _________________________________________________________________
-max_pooling2d_1 (MaxPooling2 (None, 24, 36, 64)        0         
+flatten_1 (Flatten)          (None, 240000)            0         
 _________________________________________________________________
-dropout (Dropout)            (None, 24, 36, 64)        0         
+dense_3 (Dense)              (None, 16)                3840016   
 _________________________________________________________________
-flatten (Flatten)            (None, 55296)             0         
-_________________________________________________________________
-dense (Dense)                (None, 16)                884752    
-_________________________________________________________________
-dense_1 (Dense)              (None, 32)                544       
-_________________________________________________________________
-dense_2 (Dense)              (None, 1)                 33        
+dense_4 (Dense)              (None, 1)                 17        
 =================================================================
-Total params: 904,657
-Trainable params: 904,657
+Total params: 3,841,697
+Trainable params: 3,841,697
 Non-trainable params: 0
 _________________________________________________________________
 ```
 
-The best model had an MSE of 0.1344 when predicting on the test set. 
-
 A plot comparing observed/actual earthquake magnitude values vs. the magnitude values predicted by the regression CNN model is shown here:
 
-![plot](./figures/regression_vals4.png) 
+![plot](./Figures/CNN_regression_magnitude.png) 
 
-The plot below shows the model MSE loss history over 15 epochs:
+The plot below shows the model MSE loss history over 20 epochs:
 
-![plot](./figures/model_loss.png) 
+![plot](./Figures/CNN_regression_magnitude_history.png) 
 
-These loss values indicate that the model reaches its peak performance around epoch #4, so 15 epochs was not necessary and just resulted in overfitting of the training set. To improve model speed for a real-world monitoring application, this model would only need 4 epochs to reach good performance. 
+
+## Regression CNN - P-Wave and S-Wave Arrival Time Prediction
+
+To predict p-wave and s-wave arrival times, I used 100,000 waveform images and the target variables of p-wave and s-wave arrival time sample. I created and tested a regression convolutional neural network model on the 100,000 image set, using the _seismic_CNN.py_ script in this repo. The script first imports the 100,000 randomly chosen images from the directory, performs a train-test split, compiles and then fits a regression cnn model using the specified target, and then evaluates and saves the model and produces evaluation figures. The model uses callbacks to save the partially-trained model at the end of each epoch.
+
+**P-Wave Prediction**
+
+```
+Baseline model: The baseline mse for earthquake magnitude is 0.9501049752369152 
+
+Best model: The mse of the CNN regression for earthquake magnitude is 0.15895192325115204 
+
+```
+
+**S-Wave Prediction**
+
+```
+Baseline model: The baseline mse for earthquake magnitude is 0.9501049752369152 
+
+Best model: The mse of the CNN regression for earthquake magnitude is 0.15895192325115204 
+
+```
+
+The best model had the following structure:
+```
+Model: "sequential_5"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+conv2d_5 (Conv2D)            (None, 110, 309, 64)      1664      
+_________________________________________________________________
+max_pooling2d_5 (MaxPooling2 (None, 55, 154, 64)       0         
+_________________________________________________________________
+dropout_5 (Dropout)          (None, 55, 154, 64)       0         
+_________________________________________________________________
+flatten_5 (Flatten)          (None, 542080)            0         
+_________________________________________________________________
+dense_12 (Dense)             (None, 64)                34693184  
+_________________________________________________________________
+dense_13 (Dense)             (None, 16)                1040      
+_________________________________________________________________
+dense_14 (Dense)             (None, 1)                 17        
+=================================================================
+Total params: 34,695,905
+Trainable params: 34,695,905
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+A plot comparing the observed and predicted **p-wave** arrival sample times is shown here:
+
+![plot](./Figures/CNN_regression_magnitude.png) 
+
+The model loss history for p-wave arrival sample:
+
+![plot](./Figures/CNN_regression_magnitude_history.png) 
+
+A plot comparing the observed and predicted **s-wave** arrival sample times is shown here:
+
+![plot](./Figures/CNN_regression_magnitude.png) 
+
+The model loss history for p-wave arrival sample:
+
+![plot](./Figures/CNN_regression_magnitude_history.png) 
