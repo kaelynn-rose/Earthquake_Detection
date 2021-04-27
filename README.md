@@ -340,3 +340,47 @@ The best LSTM Regression model had the following structure:
 
 
 ```
+
+## CNN and LSTM Model Comparison
+
+
+
+
+## Model Deployment with AWS Lambda
+
+To deploy the best classification model, the CNN classifier, I used AWS Lambda serverless compute. To deploy the CNN model to the Lambda function, I used the following method:
+
+1. Created a directory to put all files to containerize (_lambda_earthquake_cnn_ directory in this repo)
+2. Created a _requirements.txt_ file with required packages to run the model (Tensorflow)
+3. Placed the Python code to call the model in an _app.py_ file 
+4. Created a Dockerfile to make the container image
+5. Built the docker image, created an ECR repository, and pushed the image to ECR
+6. Created an AWS s3 bucket to hold images used to predict the class
+7. Created a Lambda function using the Dockerized container image on the AWS Lambda console
+8. Connected the s3 bucket to the Lambda function so that whenver an object is uploaded to the s3 bucket, it triggers the Lambda function to run the model
+
+![plot](./Figures/Lambda_process1.png) 
+
+![plot](./Figures/Lambda_process2.png) 
+
+
+
+## Real-Time Signal Class Prediction using Lambda
+
+To run the Lambda function on a near-real time data stream, I created a _live_data.py_ script (in this repo) to fetch seismic data from the Incorporated Research Institutions for Seismology (IRIS) SeedLink client using the Obspy package for Python. 
+
+```
+# specify client (IRIS) to retrieve data from
+client = create_client('rtserve.iris.washington.edu', on_data=handle_data)
+
+# specify stream
+client.select_stream('HV', 'AHUD', 'EHZ') # network, station, channel
+
+# run the client, this will begin streaming the data
+client.run()
+
+```
+
+I selected the Hawaiian Volcano Observatory ("HV") network because it has stations located on Kilauea volcano in Hawaii. These stations detect many earthquake signals per day, because Kilauea has an active magma plumbing system that generates a greater number of earthquakes compared to tectonic fault system. I selected the 'EHZ' channel, which is an extremely short-period, high-gain seismometer with a vertical orientation (like the train/test data used to fit and evaluate the model). 
+
+
