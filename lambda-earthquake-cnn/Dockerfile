@@ -1,4 +1,4 @@
-# Pull the base image with python 3.8 as a runtime for your Lambda
+# Pull the base image with python 3.8 as a runtime for Lambda
 FROM public.ecr.aws/lambda/python:3.8
 
 # Install OS packages for Pillow-SIMD
