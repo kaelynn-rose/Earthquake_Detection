@@ -178,9 +178,9 @@ To predict p-wave and s-wave arrival times, I used 100,000 waveform images and t
 **P-Wave Prediction**
 
 ```
-Baseline model: The baseline mse for earthquake magnitude is 0.9501049752369152 
+Baseline model: The baseline mse for p-wave arrival time is 30585.887678084586 
 
-Best model: The mse of the CNN regression for earthquake magnitude is 0.15895192325115204 
+Best model: The mse of the CNN regression for p-wave arrival time is 1216.204345703125 
 
 ```
 
@@ -268,7 +268,26 @@ prediction is 0.97412, the precision is 0.9774326297623789, and the recall is
 The best LSTM Classification model had the following structure:
 
 ```
-
+Model: "sequential_10"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+simple_rnn (SimpleRNN)       (None, 1, 64)             23360     
+_________________________________________________________________
+lstm_6 (LSTM)                (None, 1, 64)             33024     
+_________________________________________________________________
+dropout_10 (Dropout)         (None, 1, 64)             0         
+_________________________________________________________________
+lstm_7 (LSTM)                (None, 32)                12416     
+_________________________________________________________________
+dense_27 (Dense)             (None, 16)                528       
+_________________________________________________________________
+dense_28 (Dense)             (None, 1)                 17        
+=================================================================
+Total params: 69,345
+Trainable params: 69,345
+Non-trainable params: 0
+_________________________________________________________________
 
 
 ```
@@ -361,7 +380,9 @@ _________________________________________________________________
 
 ## CNN and LSTM Model Comparison
 
+![plot](./Figures/CNN_LSTM_comparison.png) 
 
+As seen on the chart above, the CNN models beat the LSTM models in each of the four categories. Though the accuracy of the CNN was only ~1% higher, the magnitude, p-wave, and s-wave estimates each had about half the MSE compared to the LSTM model. Therefore, when deploying the model, I use the CNN model. 
 
 
 ## Model Deployment with AWS Lambda
@@ -431,6 +452,10 @@ Here is a slideshow video showing the spectrograms of the two earthquakes which 
 
 
 
+## Conclusion
 
+In this study, I created two types of models: CNN models and LSTM models, which are a type of RNN model. Each of these models had two types, classification and regression. These were used to predict the class of a signal as either 'earthquake' or 'noise', the earthquake magnitude, p-wave arrival times, and s-wave arrival times. The best classification model was the CNN classifier, which had 98.5% accuracy, 99.1% precision, and 98.6% recall, compared to the LSTM classifier which had 97.4% accuracy, 97.7% precision, and 98.0% recall. 
+
+The best CNN classification model was connected to a live stream of data from Kilauea volcano in Hawaii to monitor earthquakes in near-real time. The live data script was set up to generate one image from the seismic data every 20 seconds, and send the image to an s3 bucket. The arrival of the image in the s3 bucket triggered the Lambda function, which predicted the class of the earthquake. An example of 2 earthquakes from April 27, 2021 is shown above, where both earthquakes were correctly predicted as earthquakes and all other images were correctly classified as noise. 
 
 
