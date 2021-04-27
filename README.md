@@ -389,5 +389,24 @@ I selected the Hawaiian Volcano Observatory ("HV") network because it has statio
 
 Whenever the SeedLink client in the _live_data.py_ script recieves a signal trace, it checks to see if there are more than 9 traces (~6500 samples/ about 1 minute). If there are more than 9 traces, it creates an image using the first 9 traces, and then removes the first 3 traces from the list. In this way, it creates images with a moving time window of 20 seconds, so that there is a new image created every 20 seconds. It uploads each image to the s3 bucket using boto3, which triggers the Lambda function. The Lambda function predicts the class of the seismic signal in the image, and prints the results to the AWS CloudWatch console. 
 
+#### Example Earthquakes Recorded and Predicted by Lambda
+
+I ran the _live_data.py_ script overnight, and recorded some earthquakes at Kilauea. Here is a screenshot from the Lambda console showing the usage metrics:
+
+![plot](./Figures/Lambda_logs.png) 
+
+
+Here is a screenshot of earthquakes recorded by the USGS at Kilauea, and an example of how the Lambda function was used to run the CNN model and correctly predict these as earthquakes. Look at the top two most recent earthquakes:
+
+![plot](./Figures/Kilauea_earthquakes_USGS.png) 
+
+
+And finally, here is a screenshot of the CloudWatch logs predicting the class of each image from 4/27/2021 at times 17:51:46 to 18:15:02 (UTC). Both of the most recent earthquakes at Kilauea are shown correctly predicted at the right times, and all other images are correctly labeled as noise.
+
+Here is a slideshow video showing the spectrograms of the two earthquakes which were correctly predicted and verified as having occurred by USGS:
+
+
+
+
 
 
