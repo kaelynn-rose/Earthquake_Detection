@@ -1,6 +1,20 @@
 '''
+This script contains two LSTM model classes, which can be used to run regression or classification RNN models. See below each class for examples of how to use each class.
 
+This script:
 
+    1. Calculates signal envelopes from raw signal data
+    2. Contains the ClassificationLSTM Class to perform classification using an LSTM RNN model on signal data, to classify signals as 'earthquakes' or 'noise'. Outputs:
+            * Confusion matrix and plot
+            * Accuracy history plot
+            * Test accuracy values
+            
+    3. Contains the RegressionLSTM Class to perform regression using an LSTM regression model on signal data. The model can be used to predict several different target labels for earthquake signals, including earthquake magnitude, earthquake p-wave arrival time, and earthquake s-wave arrival time.
+            * Model loss (MSE) values
+            * Loss (MSE) history plot
+            * Observed vs. predicted output scatterplot
+
+This script requires that the user has already created signal traces using the get_signal_traces.py file in this repo. If needed, use the LSTM_grid_search.py file contained in this repo to run a grid search for best parameters for the model.
 
 Created by Kaelynn Rose
 on 4/22/2021
@@ -26,10 +40,14 @@ from joblib import Parallel,delayed
 
 from scipy import signal
 from scipy.signal import resample,hilbert
-from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 
 
-# get envelopes
+# set data paths
+dataset_path = 'partial_signal_dataset100000.npy'
+envelopes_path = 'envelopes100k.npy'
+label_csv_path = 'partial_signal_df100000.csv'
+
+# get signal envelopes for every signal
 dataset = np.load(dataset_path,allow_pickle=True)
 counter = 0
 envelopes = []
@@ -46,12 +64,13 @@ for i in range(0,len(dataset)):
     rolling_average = rolling_obj.mean()
     rolling_average_demeaned = rolling_average[199:] - np.mean(rolling_average[199:])
     rolling_average_padded = np.pad(rolling_average_demeaned,(199,0),'constant',constant_values=(list(rolling_average_demeaned)[0])) # pad with zeros to remove nans created by rolling mean
-    resamp = signal.resample(rolling_average_padded, 1000) # resample signal from 6000 samples to 300
+    resamp = signal.resample(rolling_average_padded, 300) # resample signal from 6000 samples to 300
     envelopes.append(resamp)
-np.save('envelopes100k1000samples.npy',envelopes)
+np.save('envelopes100k.npy',envelopes)
 
 
 
+# LSTM Classification Class
 
 class ClassificationLSTM:
 
@@ -69,8 +88,11 @@ class ClassificationLSTM:
         self.cm = []
         self.history = []
         self.epochs = []
+        self.accuracy = []
+        self.precision = []
+        self.recall = []
         
-        self.envelopes = np.load(self.envelopes_path,allow_pickle=True)
+        self.envelopes = np.load(self.envelopes_path,allow_pickle=True) # load envelopes from file
         self.label_csv = pd.read_csv(self.label_csv_path)
         self.labels = self.label_csv[target]
         self.labels = np.array(self.labels.map(lambda x: 1 if x == 'earthquake_local' else 0))
@@ -79,13 +101,14 @@ class ClassificationLSTM:
     def train_test_split(self, test_size,random_state):
     
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.envelopes, self.labels,random_state = random_state,test_size=test_size) # train test split
-        self.X_train = np.reshape(self.X_train, (np.array(self.X_train).shape[0], 1, np.array(self.X_train).shape[1]))
-        self.X_test = np.reshape(self.X_test, (np.array(self.X_test).shape[0], 1, np.array(self.X_test).shape[1]))
+        self.X_train = np.reshape(self.X_train, (np.array(self.X_train).shape[0], 1, np.array(self.X_train).shape[1])) # reshape
+        self.X_test = np.reshape(self.X_test, (np.array(self.X_test).shape[0], 1, np.array(self.X_test).shape[1])) # reshape
         self.X_train.shape, self.X_test.shape, self.y_train.shape, self.y_test.shape
         
     def LSTM_fit(self,epochs,metric,batch_size):
         
         self.epochs = epochs
+        
         # set callbacks to save model at each epoch
         callbacks = [
             keras.callbacks.ModelCheckpoint(
@@ -133,14 +156,14 @@ class ClassificationLSTM:
         test_loss, test_acc = self.model.evaluate(self.X_test, self.y_test, verbose=1)
         print(f'Test data accuracy: {test_acc}')
 
-        predicted_classes = self.model.predict_classes(self.X_test)
-        accuracy = accuracy_score(self.y_test,predicted_classes)
-        precision = precision_score(self.y_test,predicted_classes)
-        recall = recall_score(self.y_test,predicted_classes)
-        print(f'The accuracy of the model is {accuracy}, the precision is {precision}, and the recall is {recall}')
+        predicted_classes = self.model.predict_classes(self.X_test) # predicted class for each image
+        self.accuracy = accuracy_score(self.y_test,predicted_classes) # accuracy of model
+        self.precision = precision_score(self.y_test,predicted_classes) # precision of model
+        self.recall = recall_score(self.y_test,predicted_classes) # recall of model
+        print(f'The accuracy of the model is {self.accuracy}, the precision is {self.precision}, and the recall is {self.recall}')
         
         # save model
-        saved_model_path = f'./saved_models/LSTM_classification_acc{accuracy}_prec{precision}_rec{recall}_epochs{self.epochs}_{format(datetime.now().strftime("%Y%m%d"))}' # _%H%M%S
+        saved_model_path = f'./saved_models/LSTM_classification_acc{self.accuracy}_prec{self.precision}_rec{self.recall}_epochs{self.epochs}_{format(datetime.now().strftime("%Y%m%d"))}' # _%H%M%S
         # Save entire model to a HDF5 file
         self.model.save(saved_model_path)
         
@@ -151,25 +174,20 @@ class ClassificationLSTM:
         plt.style.use('default')
         disp = ConfusionMatrixDisplay(confusion_matrix=self.cm, display_labels=['not earthquake','earthquake'])
         disp.plot(cmap='Blues', values_format='')
-        plt.title(f'Classification CNN Results ({self.epochs} epochs)')
+        plt.title(f'Classification LSTM Results ({self.epochs} epochs)')
         plt.tight_layout()
         plt.savefig('confusion_matrix.png')
         plt.show()
 
-
-# set data paths
-dataset_path = 'partial_signal_dataset100000.npy'
-envelopes_path = 'envelopes100k.npy'
-label_csv_path = 'partial_signal_df100000.csv'
-
 # use ClassificationLSTM
-model_c2 = ClassificationLSTM(envelopes_path,label_csv_path,'trace_category')
-model_c2.train_test_split(test_size=0.25,random_state=44)
-model_c2.LSTM_fit(epochs=50,metric='accuracy',batch_size=64)
-model_c2.LSTM_evaluate()
+model_c2 = ClassificationLSTM(envelopes_path,label_csv_path,'trace_category') # initialize class
+model_c2.train_test_split(test_size=0.25,random_state=44) # train test split
+model_c2.LSTM_fit(epochs=50,metric='accuracy',batch_size=64) # fit model
+model_c2.LSTM_evaluate() # evaluate model
 
 
 
+# LSTM Regression Class
 
 class RegressionLSTM:
 
@@ -187,14 +205,15 @@ class RegressionLSTM:
         self.cm = []
         self.history = []
         self.epochs = []
+        self.test_loss = []
         
-        self.envelopes = np.load(self.envelopes_path,allow_pickle=True)
-        self.label_csv = pd.read_csv(self.label_csv_path)
-        self.labels = self.label_csv[target]
+        self.envelopes = np.load(self.envelopes_path,allow_pickle=True) # load signal envelopes from file
+        self.label_csv = pd.read_csv(self.label_csv_path) # load labels from csv that correspond to enveloeps
+        self.labels = self.label_csv[target] # find labels for specified target
         
-        eq_envelopes = np.array(self.envelopes)[self.label_csv['trace_category'] == 'earthquake_local']
+        eq_envelopes = np.array(self.envelopes)[self.label_csv['trace_category'] == 'earthquake_local'] # only find signals corresponding to earthquakes, not noise
         print(len(eq_envelopes))
-        eq_labels = self.label_csv[self.target][self.label_csv['trace_category'] == 'earthquake_local']
+        eq_labels = self.label_csv[self.target][self.label_csv['trace_category'] == 'earthquake_local'] # only find labels corresponding to earthquakes, not noise
         print(len(eq_labels))
         
         self.envelopes = eq_envelopes
@@ -254,17 +273,17 @@ class RegressionLSTM:
         print('Evaluating model on test dataset')
 
         # evaluate model
-        test_loss = self.model.evaluate(self.X_test, self.y_test, verbose=1)
-        print(f'Test data loss: {test_loss}')
+        self.test_loss = self.model.evaluate(self.X_test, self.y_test, verbose=1) # get MSE
+        print(f'Test data loss: {self.test_loss}')
 
         # save model
-        saved_model_path = f'./saved_models/LSTM_regression_loss{test_loss}_epochs{self.epochs}_{format(datetime.now().strftime("%Y%m%d"))}' # _%H%M%S
+        saved_model_path = f'./saved_models/LSTM_regression_loss{self.test_loss}_epochs{self.epochs}_{format(datetime.now().strftime("%Y%m%d"))}' # _%H%M%S
         # Save entire model to a HDF5 file
         self.model.save(saved_model_path)
         
         plt.style.use('ggplot')
         fig, ax = plt.subplots(figsize=(7,7))
-        ax.scatter(self.y_test,self.y_pred,alpha=0.05)
+        ax.scatter(self.y_test,self.y_pred,alpha=0.01)
         point1 = [0,0]
         point2 = [1200,1200]
         xvalues = [point1[0], point2[0]]
@@ -272,7 +291,7 @@ class RegressionLSTM:
         ax.plot(xvalues,yvalues,color='blue')
         ax.set_ylabel('Predicted Value',fontsize=14)
         ax.set_xlabel('Observed Value',fontsize=14)
-        ax.set_title(f'Regression LSTM Results S-Wave Arrival Times | ({self.epochs} epochs)',fontsize=14)
+        ax.set_title(f'Regression LSTM Results | ({self.epochs} epochs)',fontsize=14)
         ax.tick_params(axis='x', labelsize=14)
         ax.tick_params(axis='y', labelsize=14)
         ax.set_xlim([0,1200])
@@ -282,18 +301,15 @@ class RegressionLSTM:
         plt.show()
 
 
-# set data paths
-dataset_path = 'partial_signal_dataset100000.npy'
-envelopes_path = 'envelopes100k.npy'
-label_csv_path = 'partial_signal_df100000.csv'
-
 # use RegressionLSTM
-model_r1 = RegressionLSTM(envelopes_path,label_csv_path,'p_arrival_sample')
-model_r1.train_test_split(test_size=0.25,random_state=44)
-model_r1.LSTM_fit(epochs=50,batch_size=32)
-model_r1.LSTM_evaluate()
+model_r1 = RegressionLSTM(envelopes_path,label_csv_path,'p_arrival_sample') # initialize regression LSTM model
+model_r1.train_test_split(test_size=0.25,random_state=44) # train test split
+model_r1.LSTM_fit(epochs=50,batch_size=32) # fit model
+model_r1.LSTM_evaluate() # get model mse
 
 
+
+# nicer plots if needed
 # p-wave
 plt.style.use('ggplot')
 fig, ax = plt.subplots(figsize=(7,7))
@@ -333,75 +349,3 @@ ax.set_ylim([0,5000])
 plt.tight_layout()
 plt.savefig('true_vs_predicted.png')
 plt.show()
-
-
-
-
-
-
-
-
-
-# grid search
-
-def algorithm_pipeline(X_train_data, X_test_data, y_train_data, y_test_data,
-                       model, param_grid, cv=10, scoring_fit='neg_mean_squared_error',
-                       do_probabilities = False):
-    gs = GridSearchCV(
-        estimator=model,
-        param_grid=param_grid,
-        cv=cv,
-        n_jobs=-2,
-        scoring=scoring_fit,
-        verbose=2
-    )
-    fitted_model = gs.fit(X_train_data, y_train_data)
-    
-    if do_probabilities:
-      pred = fitted_model.predict_proba(X_test_data)
-    else:
-      pred = fitted_model.predict(X_test_data)
-    
-    return fitted_model, pred
-  
-  
-  
-envelopes = np.load(envelopes_path,allow_pickle=True)
-label_csv = pd.read_csv(label_csv_path)
-labels = label_csv['trace_category']
-labels = np.array(labels.map(lambda x: 1 if x == 'earthquake_local' else 0))
-    
-X_train, X_test, y_train, y_test = train_test_split(envelopes, labels,random_state = 44,test_size=0.25) # train test split
-X_train = np.reshape(X_train, (np.array(X_train).shape[0], 1, np.array(X_train).shape[1]))
-X_test = np.reshape(X_test, (np.array(X_test).shape[0], 1, np.array(X_test).shape[1]))
-X_train.shape, X_test.shape, y_train.shape, y_test.shape
-    
-
-def build_LSTM(epochs=10,dropout_rate=0.2,optimizer='Adam',batch_size=32,activation='relu'):
-
-    # model design
-    model = keras.Sequential()
-    model.add(keras.layers.SimpleRNN(64, input_shape=(1,X_train.shape[2]), return_sequences=True))
-    model.add(keras.layers.LSTM(64, input_shape=(1,X_train.shape[2]), return_sequences=True))
-    model.add(keras.layers.Dropout(dropout_rate))
-    model.add(keras.layers.LSTM(32, return_sequences=False))
-    model.add(keras.layers.Dense(16, activation=activation))
-    model.add(keras.layers.Dense(1, activation='sigmoid'))
-    model.compile(optimizer=optimizer,
-                  loss='binary_crossentropy', metrics='accuracy')
-
-    return model
-
-param_grid = {'epochs':[10,50],
-              'dropout_rate':[0.2,0.5],
-              'optimizer':['Adam','Rmsprop'],
-              'batch_size':[8,16,32,64],
-              'activation':['relu','sigmoid','tanh']
-              }
-
-# fit and predict
-model = KerasClassifier(build_fn = build_LSTM, verbose=1)
-model, pred = algorithm_pipeline(X_train, X_test, y_train, y_test, model, param_grid, cv=5, scoring_fit='neg_log_loss')
-
-print(model.best_score_)
-print(model.best_params_)
