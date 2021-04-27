@@ -61,12 +61,17 @@ The global distribution of seismic stations which detected the earthquakes in th
 
 **CNN Classification & Earthquake Magnitude Prediction Regression Images**
 
-To create images for training my convolutional neural network, I plotted both the waveform and spectrogram for the vertical component of each seismogram and saved these as separate images, with the waveform images being 110x160 pixels and the spectrograms being 100x150 pixel images. I normalized the color axis of the spectrograms to the range of -10 to 25 decibels per Hz for consistency across all signals. The spectrograms were created using an NFFT of 256. These signals were plotted using the _plot_images.py_ file contained in this repo.
+To create images for training my convolutional neural network, I plotted both the waveform and spectrogram for the vertical component of each seismogram and saved these as separate 3x2 inch images, with the waveform images being 110x160 pixels and the spectrograms being 100x150 pixel images. I normalized the color axis of the spectrograms to the range of -10 to 25 decibels per Hz for consistency across all signals. The spectrograms were created using an NFFT of 256. These signals were plotted using the _plot_images.py_ file contained in this repo.
 
-Here are examples of earthquake and noise spectrograms that were used to train the CNN models:
+Here are examples of earthquake and noise spectrograms that were used to train the CNN classification and magnitude prediction models:
 ![plot](./Figures/earthquakes_vs_noise_cnn_images.png) 
 
 **CNN P-Wave and S-Wave Prediction Regression Images**
+
+Since the p-wave and s-wave arrival times can be quite close together at the scale of the images used previously, I created a new set of images using 6x2 inch dimensions. The waveform images were used since preliminary testing showed that the CNN models trained with the waveforms rather than the spectrograms for p-waves and s-waves showed better prediction results.
+
+Here are examples of earthquake and noise waveforms that were used to train the CNN p-wave and s-wave prediction models:
+![plot](./Figures/example_waveforms.png) 
 
 ## Classification CNN
 

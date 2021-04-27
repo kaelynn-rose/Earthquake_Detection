@@ -309,7 +309,7 @@ def eq_vs_noise_waveforms_plot():
     datas = [data1,data2,data3,data4,data5,data6]
     titles = ['earthquake','earthquake','earthquake','noise','noise','noise']
     for i, ax in enumerate(axs.flatten()):
-        im = ax.plot(np.linspace(0,60,6000),data[:,2],color='k',linewidth=1)
+        im = ax.plot(np.linspace(0,60,6000),datas[i][:,2],color='k',linewidth=1)
         ax.set_ylabel('Amplitude (Pa)',fontsize=12)
         ax.set_xlabel('Time (s)',fontsize=12)
         ax.set_title(titles[i],fontsize=14)
