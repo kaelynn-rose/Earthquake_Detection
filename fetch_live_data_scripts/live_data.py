@@ -33,7 +33,7 @@ def handle_data(trace):
     # if more than 9 traces in traces variable, create a spectrogram figure
     if len(traces) > 9:
         data_packet = traces[0:9] # data to plot (~60 seconds)
-        traces = traces[5:] # remove the first 5 traces from the traces variable
+        traces = traces[2:] # remove the first 2 traces from the traces variable
         print('Shortened trace')
         data_packet = data_packet[0] + data_packet[1] + data_packet[2] + data_packet[3] + data_packet[4] + data_packet[5] + data_packet[6] + data_packet[7] + data_packet[8] # merge signal traces into one signal to plot
         print(f'The data packet is {data_packet}')

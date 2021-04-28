@@ -39,7 +39,7 @@ Earthquakes and their p-wave and s-wave arrival times in the STEAD dataset were 
 * earthquake category (i.e., 'earthquake' or 'noise')
 * etc.
 
-Each seismic sample has 3 data channels of seismic data in .h5py format along with the metadata. The three channels correspond to the north-south, east-west, and vertical components of the seismogram (the amount of ground displacement measured on each of these axes by the instrument). Each sample is 60 seconds long and sampled at 100 Hz, for a total of 6000 samples per signal. Since the class balance of the full STEAD data is 235,426 noise samples to 1,030,232 earthquake signals (about 18% noise and 82% earthquakes), I randomly sampled 400,000 earthquake signals from the full earthquake dataset and used all 235,426 noise samples to create a closer class balance of 37% noise to 63% earthquakes for a total dataset of 635426 samples (about half the original dataset). Of these samples, 100,000 were randomlly selected to train each model.
+Each seismic sample has 3 data channels of seismic data in .h5py format along with the metadata. The three channels correspond to the north-south, east-west, and vertical components of the seismogram (the amount of ground displacement measured on each of these axes by the instrument). Each sample is 60 seconds long and sampled at 100 Hz, for a total of 6000 samples per signal. Since the class balance of the full STEAD data is 235,426 noise samples to 1,030,232 earthquake signals (about 18% noise and 82% earthquakes), I randomly sampled 400,000 earthquake signals from the full earthquake dataset and used all 235,426 noise samples to create a closer class balance of 37% noise to 63% earthquakes for a total dataset of 635426 samples (about half the original dataset). Of these samples, 100,000 were randomly selected to train each model.
 
 ### Exploratory Data Analysis
 
@@ -56,6 +56,11 @@ The global distribution of earthquakes in this dataset is shown here:
 
 The global distribution of seismic stations which detected the earthquakes in the dataset is shown here:
 ![plot](./Figures/station_map.png) 
+
+The distributions of p-wave and s-wave arrival times (in samples, where 1 second is 100 samples) is shown on the plot below. The p-wave arrival times have a high frequency of being selected at time intervals of 100, whereas the s-wave arrival times do not display this pattern as strongly. This may affect the p-wave prediction MSE of the models later on, as the "true" data is picked at intervals of 100 samples / 1 second and the predicted times may be more granular.
+
+![plot](./Figures/pwaves_s_waves_EDA.png) 
+
 
 ### Image Creation
 
@@ -248,6 +253,12 @@ Preliminary testing showed that the 6000 sample signals were too long and too no
 3. Used the signal envelopes to train the classification and regression LSTM models
 4. Used the _LSTM_grid_search.py_ script to find optimal hyperparameters using a grid search method
 
+Here is an example of a signal (gray) with its calculated envelope (red) and p-wave and s-wave arrival times shown. The p-wave and s-wave arrivals correspond with a sharp increase in slope of the envelope:
+
+![plot](./Figures/signal_envelope_example2.png) 
+
+
+
 
 
 ## Classification LSTM - 'Earthquake' or 'Noise' Prediction
@@ -426,12 +437,12 @@ client.run()
 
 I selected the Hawaiian Volcano Observatory ("HV") network because it has stations located on Kilauea volcano in Hawaii. These stations detect many earthquake signals per day, because Kilauea has an active magma plumbing system that generates a greater number of earthquakes compared to a regular tectonic fault system. I selected the 'EHZ' channel, which is an extremely short-period, high-gain seismometer with a vertical orientation (like the train/test data used to fit and evaluate the model). 
 
-Whenever the SeedLink client in the _live_data.py_ script recieves a signal trace, it checks to see if there are more than 9 traces (~6500 samples/ about 1 minute). If there are more than 9 traces, it creates an image using the first 9 traces, and then removes the first 3 traces from the list. In this way, it creates images with a moving time window of 20 seconds, so that there is a new image created every 20 seconds. It uploads each image to the s3 bucket using boto3, which triggers the Lambda function. The Lambda function predicts the class of the seismic signal in the image, and prints the results to the AWS CloudWatch console. 
+Whenever the SeedLink client in the _live_data.py_ script recieves a signal trace, it checks to see if there are more than 9 traces (~6500 samples/ about 1 minute). If there are more than 9 traces, it creates an image using the first 9 traces, and then removes the first 2 traces from the list. In this way, it creates images with a moving time window of ~15 seconds, so that there is a new image created every 15 seconds. It uploads each image to the s3 bucket using boto3, which triggers the Lambda function. The Lambda function predicts the class of the seismic signal in the image, and prints the results to the AWS CloudWatch console. 
 
 
 #### Example Earthquakes Recorded and Predicted by Lambda
 
-I ran the _live_data.py_ script overnight, and recorded some earthquakes at Kilauea. Here is a screenshot from the Lambda console showing the usage metrics:
+I ran the _live_data.py_ script for two days, and recorded some earthquakes at Kilauea. Here is a screenshot from the Lambda console showing the usage metrics:
 
 ![plot](./Figures/Lambda_logs.png) 
 
@@ -442,9 +453,13 @@ Here is a screenshot of earthquakes recorded by the USGS at Kilauea, and an exam
 ![plot](./Figures/Kilauea_earthquakes_USGS.png) 
 
 
-And finally, here is a screenshot of the CloudWatch logs predicting the class of each image from 4/27/2021 at times 17:51:46 to 18:15:02 (UTC). Both of the most recent earthquakes at Kilauea indicated in red on the Kilauea figure are shown correctly predicted at the right times, and all other images are correctly labeled as noise.
+And finally, here are screenshots of the CloudWatch logs predicting the class of each image. Both of the most recent earthquakes at Kilauea indicated in red on the Kilauea figure are shown correctly predicted at the right times, and all other images are correctly labeled as noise.
 
-![plot](./Figures/Lambda_cloudwatch1.png) 
+Earthquake 1
+![plot](./Figures/cloudwatch_eq1.png) 
+
+Earthquake 2
+![plot](./Figures/cloudwatch_eq2.png) 
 
 Here is a slideshow video showing the spectrograms of the two earthquakes which were correctly predicted and verified as having occurred by USGS. The mostly black spectrogram images are noise, and the appearance of a light-colored pulse indicates an earthquake:
 

@@ -271,7 +271,7 @@ def eq_vs_noise_plot():
 # use this plotting function
 eq_vs_noise_plot()
 
-### Figure 5: example plot of earthquake signals vs. noise signals being used to train the CNN
+### Figure 6: example plot of earthquake signals vs. noise signals being used to train the CNN
 
 def eq_vs_noise_waveforms_plot():
     dtfl = h5py.File(eq1_sig_path, 'r')
@@ -320,3 +320,26 @@ def eq_vs_noise_waveforms_plot():
 
 # use this plotting function
 eq_vs_noise_waveforms_plot()
+
+
+### Figure 7: Plot p-wave and s-wave arrival times
+
+def plot_waves():
+
+    # plot
+    plt.style.use('ggplot')
+    fig, (ax1,ax2) = plt.subplots(1,2,figsize=(16,5))
+    ax1.hist(img_dataset['p_arrival_sample'],bins=100) # plot earthquake source magnitude
+    ax1.set_xlabel('P-wave arrival time (samples)',fontsize=14)
+    ax1.set_ylabel('Frequency',fontsize=14)
+    ax1.set_title('P-Wave',fontsize=18)
+    ax2.hist(img_dataset['s_arrival_sample'], bins=100)
+    ax2.set_xlabel('S-wave arrival time (samples)',fontsize=14) # plot earthquake source depth
+    ax2.set_ylabel('Frequency',fontsize=14)
+    #ax2.set_xlim([-10, 100])
+    ax2.set_title('S-Wave',fontsize=18)
+    #plt.tight_layout()
+    plt.show()
+
+# test the plotting function
+plot_waves() # will produce a plot of eathquake magnitudes, depths, and distances in the full image dataset
