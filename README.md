@@ -463,7 +463,7 @@ Earthquake 2
 
 Here is a slideshow video showing the spectrograms of the two earthquakes which were correctly predicted and verified as having occurred by USGS. The mostly black spectrogram images are noise, and the appearance of a light-colored pulse indicates an earthquake:
 
-![earthquake_slideshow](https://user-images.githubusercontent.com/73151026/116296906-9c366e80-a74f-11eb-863f-9e372a972279.mp4)
+![earthquake_slideshow](https://user-images.githubusercontent.com/73151026/116360405-be160c80-a7b4-11eb-8be0-8faf72a6aa4a.mp4)
 
 
 
