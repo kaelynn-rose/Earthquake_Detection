@@ -76,7 +76,7 @@ Here are examples of earthquake and noise spectrograms that were used to train t
 Since the p-wave and s-wave arrival times can be quite close together at the scale of the images used previously, I created a new set of images using 6x2 inch dimensions. The waveform images were used since preliminary testing showed that the CNN models trained with the waveforms rather than the spectrograms for p-waves and s-waves showed better prediction results.
 
 Here are examples of earthquake and noise waveforms that were used to train the CNN p-wave and s-wave prediction models:
-![plot](./Figures/example_waveforms.png) 
+![plot](./Figures/earthquakes_vs_noise_waveforms.png) 
 
 ## Classification CNN - 'Earthquake' or 'Noise' Prediction
 
