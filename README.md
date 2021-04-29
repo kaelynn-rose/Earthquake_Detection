@@ -474,3 +474,4 @@ In this study, I created two types of models: CNN models and LSTM models, which 
 The best CNN classification model was connected to a live stream of data from Kilauea volcano in Hawaii to monitor earthquakes in near-real time. The live data script was set up to generate one image from the seismic data every 15 seconds, and send the image to an s3 bucket. The arrival of the image in the s3 bucket triggered the Lambda function, which predicted the class of the earthquake. An example of 2 earthquakes from April 28, 2021 is shown above, where both earthquakes were correctly predicted as earthquakes and all other images were correctly classified as noise. 
 
 
+(c) Kaelynn Rose 2021
