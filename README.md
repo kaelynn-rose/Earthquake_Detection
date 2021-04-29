@@ -456,9 +456,11 @@ Here is a screenshot of earthquakes recorded by the USGS at Kilauea, and an exam
 And finally, here are screenshots of the CloudWatch logs predicting the class of each image. Both of the most recent earthquakes at Kilauea indicated in red on the Kilauea figure are shown correctly predicted at the right times, and all other images are correctly labeled as noise.
 
 Earthquake 1
+
 ![plot](./Figures/cloudwatch_eq1.png) 
 
 Earthquake 2
+
 ![plot](./Figures/cloudwatch_eq2.png) 
 
 Here is a slideshow video showing the spectrograms of the two earthquakes which were correctly predicted and verified as having occurred by USGS. The mostly black spectrogram images are noise, and the appearance of a light-colored pulse indicates an earthquake:
