@@ -9,7 +9,7 @@ The goal of this study is to train a convolutional neural network using over 100
 
 Business understanding – A company or institution that performs earthquake monitoring could use these models and analysis for implementing deep learning into their monitoring algorithms, which have traditionally been based off of signal amplitude short-term-average/long-term-average (STA/LTA) calculations to flag earthquakes. These models could result in faster or more accurate detection of earthquakes.
 
-Data understanding – The full dataset consists of over 1.2 million seismic signals from the STanford EArthquake Dataset (STEAD). This is a labeled dataset that has applications for testing many other types of machine learning on seismic signals.
+Data understanding – The full dataset consists of over 1.2 million seismic signals from the STanford EArthquake Dataset (STEAD), available here: https://github.com/smousavi05/STEAD. This is a labeled dataset that has applications for testing many other types of machine learning on seismic signals.
 
 Data preparation – The seismic data was used to create 100,000 seismic data images, which were used to train the models.
 
