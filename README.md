@@ -57,7 +57,7 @@ The global distribution of earthquakes in this dataset is shown here:
 The global distribution of seismic stations which detected the earthquakes in the dataset is shown here:
 ![plot](./Figures/station_map.png) 
 
-The distributions of p-wave and s-wave arrival times (in samples, where 1 second is 100 samples) is shown on the plot below. The p-wave arrival times have a high frequency of being selected at time intervals of 100, whereas the s-wave arrival times do not display this pattern as strongly. This may affect the p-wave prediction MSE of the models later on, as the "true" data is picked at intervals of 100 samples / 1 second and the predicted times may be more granular.
+The distributions of p-wave and s-wave arrival times (in samples, where 1 second is 100 samples) is shown on the plot below. P-wave and s-wave arrival times are important because they help seismologists determine the location of the earthquake. The p-wave arrival times have a high frequency of being selected at time intervals of 100, whereas the s-wave arrival times do not display this pattern as strongly. This may affect the p-wave prediction MSE of the models later on, as the "true" data is picked at intervals of 100 samples / 1 second and the predicted times may be more granular.
 
 ![plot](./Figures/pwaves_s_waves_EDA.png) 
 
