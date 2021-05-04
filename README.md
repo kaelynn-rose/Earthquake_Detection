@@ -455,11 +455,11 @@ Here is a screenshot of earthquakes recorded by the USGS at Kilauea, and an exam
 
 And finally, here are screenshots of the CloudWatch logs predicting the class of each image. Both of the most recent earthquakes at Kilauea indicated in red on the Kilauea figure are shown correctly predicted at the right times, and all other images are correctly labeled as noise.
 
-Earthquake 1
+Earthquake 1: Time 2:20:33 on 4/28/21
 
 ![plot](./Figures/cloudwatch_eq1.png) 
 
-Earthquake 2
+Earthquake 2: Time 2:31:22 on 4/28/21
 
 ![plot](./Figures/cloudwatch_eq2.png) 
 
