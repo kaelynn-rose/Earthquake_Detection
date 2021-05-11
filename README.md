@@ -120,7 +120,7 @@ Non-trainable params: 0
 _________________________________________________________________
 ```
 
-For the use case of using this model to detect earthquakes in near-real-time, we would want to have a balance between minimizing false negatives and false positives so that we could classify earthquakes correctly but also not classify every noise signal as an earthquake. For this case, the most important metric would be accuracy since it gives us the proportion of true positives and true negatives identified by the model.
+For the use case of using this model to detect earthquakes in near-real-time, we would want to have a balance between minimizing false negatives and false positives so that we could classify earthquakes correctly but also not classify every noise signal as an earthquake. For this case, we look at the accuracy metric since it gives us the proportion of true positives and true negatives identified by the model.
 
 Evaluating the test set produced the following confusion matrix:
 
