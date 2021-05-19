@@ -137,7 +137,7 @@ The plot below shows the model accuracy history over 50 epochs:
 For the regression CNN, I used 100,000 spectrogram images and the target variable of earthquake magnitude. I created and tested a regression convolutional neural network model on the 100,000 image set, using the _seismic_CNN.py_ script in this repo. The script first imports the 100,000 randomly chosen images from the directory, performs a train-test split, compiles and then fits a regression cnn model using the specified target, and then evaluates and saves the model and produces evaluation figures. The model uses callbacks to save the partially-trained model at the end of each epoch.
 
 ```
-Baseline model: The baseline mse for earthquake magnitude is 0.9501049752369152 
+Baseline model: The baseline mse for earthquake magnitude is 0.9501049752369152  
 
 Best model: The mse of the CNN regression for earthquake magnitude is 0.15895192325115204 
 
