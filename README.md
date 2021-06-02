@@ -178,7 +178,7 @@ The plot below shows the model MSE loss history over 20 epochs:
 
 ## Regression CNN - P-Wave and S-Wave Arrival Time Prediction
 
-To predict p-wave and s-wave arrival times, I used 100,000 waveform images and the target variables of p-wave and s-wave arrival time sample. I created and tested a regression convolutional neural network model on the 100,000 image set, using the _seismic_CNN.py_ script in this repo. The script first imports the 100,000 randomly chosen images from the directory, performs a train-test split, compiles and then fits a regression cnn model using the specified target, and then evaluates and saves the model and produces evaluation figures. The model uses callbacks to save the partially-trained model at the end of each epoch.
+To predict p-wave and s-wave arrival times, I used 100,000 waveform images and the target variables of p-wave and s-wave arrival time sample. I created and tested a regression convolutional neural network model on the 100,000 image set, using the _seismic_CNN.py_ script in this repository. The script first imports the 100,000 randomly chosen images from the directory, performs a train-test split, compiles and then fits a regression cnn model using the specified target, and then evaluates and saves the model and produces evaluation figures. The model uses callbacks to save the partially-trained model at the end of each epoch.
 
 **P-Wave Prediction**
 
