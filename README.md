@@ -391,7 +391,7 @@ _________________________________________________________________
 
 ## CNN and LSTM Model Comparison
 
-![plot](./Figures/CNN_LSTM_comparison.png) 
+![plot](./Figures/model_comparison.png) 
 
 As seen on the chart above, the CNN models beat the LSTM models in each of the four categories. Though the accuracy of the CNN was only ~1% higher, the magnitude, p-wave, and s-wave estimates each had about half the MSE compared to the LSTM model. Therefore, when deploying the model, I use the CNN model. 
 
