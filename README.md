@@ -7,17 +7,17 @@ The goal of this study is to train a convolutional neural network using over 100
 
 #### CRISP-DM Process
 
-Business understanding – A company or institution that performs earthquake monitoring could use these models and analysis for implementing deep learning into their monitoring algorithms, which have traditionally been based off of signal amplitude short-term-average/long-term-average (STA/LTA) algorithms to flag earthquakes. These models could result in faster or more accurate detection of earthquakes.
+_Business understanding_ – A company or institution that performs earthquake monitoring could use these models and analysis for implementing deep learning into their monitoring algorithms, which have traditionally been based off of signal amplitude short-term-average/long-term-average (STA/LTA) algorithms to flag earthquakes. These models could result in faster or more accurate detection of earthquakes.
 
-Data understanding – The full dataset consists of over 1.2 million seismic signals from the STanford EArthquake Dataset (STEAD), available here: https://github.com/smousavi05/STEAD. This is a labeled dataset that has applications for testing many other types of machine learning on seismic signals.
+_Data understanding_ – The full dataset consists of over 1.2 million seismic signals from the STanford EArthquake Dataset (STEAD), available here: https://github.com/smousavi05/STEAD. This is a labeled dataset that has applications for testing many other types of machine learning on seismic signals.
 
-Data preparation – The seismic data was used to create 100,000 seismic data images, which were used to train the models.
+_Data preparation_ – The seismic data was used to create 100,000 seismic data images, which were used to train the models.
 
-Modeling – Two types of models were used: CNN models and LSTM models were used to classify signals as 'earthquake' or 'noise', and predict earthquake magnitude, p-wave arrival time, and s-wave arrival time.
+_Modeling_ – Two types of models were used: CNN models and LSTM models were used to classify signals as 'earthquake' or 'noise', and predict earthquake magnitude, p-wave arrival time, and s-wave arrival time.
 
-Evaluation – The models were evaluated using accuracy/precision/recall for the classification models, and mean-squared-error (MSE) loss for the regression models. The best models for each case had good performance on the training and test datsets.
+_Evaluation_ – The models were evaluated using accuracy/precision/recall for the classification models, and mean-squared-error (MSE) loss for the regression models. The best models for each case had good performance on the training and test datsets.
 
-Deployment – The best classification model (the CNN model) was containerized using Docker and deployed using an AWS Lambda function and s3 bucket. The Lambda function was connected to a live data stream for near-real time predictions.
+_Deployment_ – The best classification model (the CNN model) was containerized using Docker and deployed using an AWS Lambda function and s3 bucket. The Lambda function was connected to a live data stream for near-real time predictions.
 
 ## Data
 
