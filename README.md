@@ -23,7 +23,7 @@ _Deployment_ – The best classification model (the CNN model) was containerized
 
 For this study, I used the STanford EArthquake Dataset (STEAD) (available at https://github.com/smousavi05/STEAD), a dataset containing 1.2 million seismic signals and corresponding metadata. STEAD is a high-quality global seismic dataset for which each signal has been classified as either:
 
-1) Local earthquakes (where 'local' means that the earthquakes were recorded within 350 km from the seismic station) or 
+1) Local earthquake (where 'local' means that the earthquakes were recorded within 350 km from the seismic station) or 
 2) Seismic noise that is free of earthquake signals. 
 
 Earthquakes and their p-wave and s-wave arrival times in the STEAD dataset were classified 70% manually and 30% by an autopicker. The dataset also contained a .csv file with metadata for each seismic signal comprising 35 features, including:
