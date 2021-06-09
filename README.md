@@ -21,7 +21,7 @@ _Deployment_ – The best classification model (the CNN model) was containerized
 
 ## Data
 
-For this study, I used the STanford EArthquake Dataset (STEAD) (available at https://github.com/smousavi05/STEAD), a dataset containing 1.2 million seismic signals and corresponding metadata. STEAD is a high-quality global seismic dataset for which each signal has been classified as either:
+For this study, I used the STanford EArthquake Dataset (STEAD) (available at https://github.com/smousavi05/STEAD), a dataset containing 1.2 million seismic signals and corresponding metadata (Mousavi et al., 2019). STEAD is a high-quality global seismic dataset for which each signal has been classified as either:
 
 1) Local earthquake (where 'local' means that the earthquakes were recorded within 350 km from the seismic station) or 
 2) Seismic noise that is free of earthquake signals. 
@@ -474,6 +474,11 @@ Here is a slideshow video showing the spectrograms of the two earthquakes which 
 In this study, I created two types of models: CNN models and LSTM models, which are a type of RNN model. Each of these models had two types, classification and regression. These were used to predict the class of a signal as either 'earthquake' or 'noise', the earthquake magnitude, p-wave arrival times, and s-wave arrival times. The best classification model was the CNN classifier, which had 98.5% accuracy, 99.1% precision, and 98.6% recall, compared to the LSTM classifier which had 97.4% accuracy, 97.7% precision, and 98.0% recall. 
 
 The best CNN classification model was connected to a live stream of data from Kilauea volcano in Hawaii to monitor earthquakes in near-real time. The live data script was set up to generate one image representing 60 seconds of signal from the seismic data every 15 seconds, and send the image to an s3 bucket. The arrival of the image in the s3 bucket triggered the Lambda function, which predicted the class of the earthquake. An example of 2 earthquakes from April 28, 2021 is shown above, where both earthquakes were correctly predicted as earthquakes and all other images were correctly classified as noise. 
+
+
+## References
+
+Mousavi, S. M., Sheng, Y., Zhu, W., Beroza G.C., (2019). STanford EArthquake Dataset (STEAD): A Global Data Set of Seismic Signals for AI, IEEE Access, doi:10.1109/ACCESS.2019.2947848
 
 
 Copyright 2021 Kaelynn Rose
