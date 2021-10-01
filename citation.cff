@@ -4,7 +4,7 @@ authors:
 - family-names: "Rose"
   given-names: "K.M."
   orcid: "https://orcid.org/0000-0002-1863-6942"
-title: "Earthquake_Detection"
+title: "Earthquake Detection with Deep Learning"
 version: 1.0.0
 doi: 10.5281/zenodo.5544694
 date-released: 2021-05-01
