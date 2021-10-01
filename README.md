@@ -1,5 +1,6 @@
 # Earthquake Detection with Deep Learning
 
+[![DOI](https://zenodo.org/badge/360650102.svg)](https://zenodo.org/badge/latestdoi/360650102)
 
 ## Introduction
 
