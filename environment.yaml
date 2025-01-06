@@ -10,9 +10,11 @@ dependencies:
   - python=3.12.3
   - numpy=2.0.1
   - pandas=2.2.3
+  - pillow=11.0.0
   - matplotlib=3.9.2
   - s3fs=2024.6.1
   - scikit-learn=1.5.2
   - pip=24.2
   - pip:
-    - requests=2.32.3
+    - h5py=
+    - requests=2.32.3=3.12.1
