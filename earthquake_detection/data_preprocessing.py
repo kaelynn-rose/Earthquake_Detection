@@ -124,8 +124,8 @@ class DataPreprocessing():
         combines it into a single dataframe.'''
         print('Parsing metadata from csv files')
         metadata_dfs = []
-        for i, path in enumerate(self.metadata_paths):
-            df = pd.read_csv(path)
+        for i, path in enumerate(tqdm(self.metadata_paths)):
+            df = pd.read_csv(path, low_memory=False)
             df['chunk'] = i+1 # persist info on which trace came from which data chunk
             metadata_dfs.append(df)
 
@@ -227,6 +227,7 @@ class DataPreprocessing():
                 img_arr = np.array(img)
                 self.subsample_imgs.append(img_arr)
                 img.close()
+                plt.close()
             except Exception as e:
                 print(
                     f'Unable to plot or save spectrogram array for trace {trace_name}.'

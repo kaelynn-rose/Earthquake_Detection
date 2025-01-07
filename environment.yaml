@@ -7,14 +7,14 @@ dependencies:
   - fsspec=2024.6.1
   - ipykernel=6.29.5
   - jupyterlab=4.2.5
-  - python=3.12.3
+  - matplotlib=3.9.2
   - numpy=2.0.1
   - pandas=2.2.3
   - pillow=11.0.0
-  - matplotlib=3.9.2
-  - s3fs=2024.6.1
-  - scikit-learn=1.5.2
   - pip=24.2
+  - python=3.12.3
+  - requests==2.32.3
+  - s3fs=2024.6.1
+  - tqdm=4.66.5
   - pip:
-    - h5py=
-    - requests=2.32.3=3.12.1
+    - h5py==3.12.1
