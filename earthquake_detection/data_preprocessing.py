@@ -14,6 +14,11 @@ This module contains functions that:
 
 Additionally, this module contains utilities for converting the seismic signal traces
 into either waveform plots or spectrogram plots, for analysis purposes.
+
+Examples
+--------
+> preproc = DataPreprocessing(YOUR_DATA_DIR_PATH_HERE)
+> raw_signals, imgs, metadata = preproc.preprocess(subsample_n=SUBSAMPLE_N)
 '''
 
 
@@ -28,12 +33,19 @@ import pandas as pd
 from PIL import Image
 from tqdm import tqdm
 
-DATA_DIR_PATH = '/Users/kaelynnrose/Documents/DATA_SCIENCE/data'
-SUBSAMPLE_N = 1000 # the number of signal traces to sample from the full dataset
 
 class DataPreprocessing():
-    def __init__(self, DATA_DIR_PATH):
-        self.data_dir_path = DATA_DIR_PATH
+    '''A class to perform data preprocessing to fetch data from files of the
+    STEAD seismic signal dataset and convert a subsample of signal traces to
+    spectrograms for ML model training. See module docstring above.'''
+    def __init__(self, data_dir_path):
+        '''Initializes the DataPreprocessing object
+
+        Parameters
+        ----------
+        data_dir_path : str
+            The local directory to search for the STEAD dataset csv and h5py files'''
+        self.data_dir_path = data_dir_path
 
     def _is_populated(self, arr):
         '''Check if array is empty or has only None (dtype=object).
@@ -53,7 +65,8 @@ class DataPreprocessing():
         return True
 
     def plot_spectrogram(self, trace):
-        '''Plots a spectrogram image given a seismic signal trace.
+        '''Plots a spectrogram image for the Z-axis of a seismic signal trace, given a
+        numpy.ndarray with 3 columns, the X, Y, and Z axes.
 
         Parameters
         ----------
@@ -64,7 +77,7 @@ class DataPreprocessing():
         -------
         matplotlib.pyplot figure showing the spectrogram of the signal trace'''
         fig, ax = plt.subplots(figsize=(3,2))
-        ax.specgram(trace[:,2], Fs=100, NFFT=256, cmap='gray', vmin=-10, vmax=25) # select only the z-axis component of the signals
+        ax.specgram(trace[:,2], Fs=100, NFFT=256, cmap='gray', vmin=-10, vmax=25) # select only the z-axis component of the signal
         ax.set_xlim([0,60])
         ax.axis('off')
         plt.gca().set_axis_off()
@@ -73,18 +86,19 @@ class DataPreprocessing():
         return fig
 
     def plot_waveform(self, trace):
-        '''Plots a waveform image given a seismic signal trace.
+        '''Plots a waveform image for the Z-axis of a seismic signal trace, given a
+        numpy.ndarray with 3 columns, the X, Y, and Z axes.
 
         Parameters
         ----------
-        trace : np.array()
+        trace : numpy.ndarray
             The raw seismic signal array to plot the waveform image of
 
         Returns
         -------
         matplotlib.pyplot figure showing the waveform of the signal trace'''
         fig, ax = plt.subplots(figsize=(3,2))
-        ax.plot(np.linspace(0,60,6000), trace[:,2], color='k', linewidth=1)
+        ax.plot(np.linspace(0,60,6000), trace[:,2], color='k', linewidth=1) # select only the z-axis component of the signal
         ax.set_xlim([0,60])
         ax.axis('off')
         plt.gca().set_axis_off()
@@ -143,6 +157,18 @@ class DataPreprocessing():
         return subsample_metadata
 
     def _read_h5py_files(self, trace_names):
+        '''Reads seismic signal trace data for the indicated trace names
+        from the h5py files in the directory specified in the class init
+
+        Parameters
+        ----------
+        trace_names : list of str
+            A list of trace names to fetch data for from the .h5py files
+
+        Returns
+        -------
+        dict : A dictionary where the keys are the trace name strings, and the values
+        are the corresponding seismic signal trace data arrays (np.array format)'''
         traces = {}
         for i, path in enumerate(self.data_paths):
             print(f'Parsing traces from file at path # {i}/{len(self.data_paths)}')
@@ -157,6 +183,31 @@ class DataPreprocessing():
         return traces
 
     def preprocess(self, subsample_n):
+        '''Preprocesses signal data and metadata for the csv and h5py data files
+        that are located in the directory given in the class init (see above).
+        First fetches the data paths of the individual files in the directory,
+        then parses the metadata from the csv files and combines it into one
+        dataframe, takes a subsample of traces from the h5py files, and then
+        creates spectrograms for each signal trace in preparation for use in
+        model training. See examples in module docstring above.
+
+        Parameters
+        ----------
+        subsample_n : int
+            The number of traces to randomly sample from the complete dataset (all
+            of the h5py files contained in the directory path specified in the class init)
+
+        Returns
+        -------
+        subsample_traces : dict
+            A dictionary where the keys are the trace name strings, and the values
+            are the corresponding seismic signal trace data arrays (np.array format).
+            Subsample of size subsample_n from the full dataset.
+        subsample_imgs : list of numpy.ndarray
+            A list containing arrays for each signal trace. Corresponds to the order
+            of metadata in subsample_metadata
+        subsample_metadata : pd.DataFrame
+            The metadata corresponding to the signal traces in subsample_images'''
         print(f'Data preprocessing for subsample of signal data of size {subsample_n}')
         self._fetch_datapaths_from_dir()
         self. _parse_metadata_csvs()
@@ -187,5 +238,3 @@ class DataPreprocessing():
         return self.subsample_traces, self.subsample_imgs, self.subsample_metadata
 
 
-preproc = DataPreprocessing(DATA_DIR_PATH)
-raw_signals, imgs, metadata = preproc.preprocess(subsample_n=SUBSAMPLE_N)
