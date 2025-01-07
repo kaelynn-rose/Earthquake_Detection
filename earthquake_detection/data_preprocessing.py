@@ -216,6 +216,7 @@ class DataPreprocessing():
         self.subsample_traces = self._read_h5py_files(subsample_trace_names)
 
         # Convert the signal traces into spectrogram images and then store the images in an array
+        print('Creating spectrograms from signal traces and saving to array')
         self.subsample_imgs = []
         for trace_name, trace in tqdm(self.subsample_traces.items()):
             try:
