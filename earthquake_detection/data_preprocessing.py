@@ -36,7 +36,16 @@ class DataPreprocessing():
         self.data_dir_path = DATA_DIR_PATH
 
     def _is_populated(self, arr):
-        # Check if array is empty or has only None (dtype=object)
+        '''Check if array is empty or has only None (dtype=object).
+
+        Parameters
+        ----------
+        arr : np.array()
+            The array to check if empty or None
+
+        Returns
+        -------
+        bool : Whether the array is empty'''
         if arr.size == 0:  # Check if array is empty
             return False
         if arr.dtype == object and np.all(arr == None):  # Check if array contains only None values
@@ -44,6 +53,16 @@ class DataPreprocessing():
         return True
 
     def plot_spectrogram(self, trace):
+        '''Plots a spectrogram image given a seismic signal trace.
+
+        Parameters
+        ----------
+        trace : np.array()
+            The raw seismic signal array to plot the spectrogram image of
+
+        Returns
+        -------
+        matplotlib.pyplot figure showing the spectrogram of the signal trace'''
         fig, ax = plt.subplots(figsize=(3,2))
         ax.specgram(trace[:,2], Fs=100, NFFT=256, cmap='gray', vmin=-10, vmax=25) # select only the z-axis component of the signals
         ax.set_xlim([0,60])
@@ -54,6 +73,16 @@ class DataPreprocessing():
         return fig
 
     def plot_waveform(self, trace):
+        '''Plots a waveform image given a seismic signal trace.
+
+        Parameters
+        ----------
+        trace : np.array()
+            The raw seismic signal array to plot the waveform image of
+
+        Returns
+        -------
+        matplotlib.pyplot figure showing the waveform of the signal trace'''
         fig, ax = plt.subplots(figsize=(3,2))
         ax.plot(np.linspace(0,60,6000), trace[:,2], color='k', linewidth=1)
         ax.set_xlim([0,60])
@@ -64,6 +93,9 @@ class DataPreprocessing():
         return fig
 
     def _fetch_datapaths_from_dir(self):
+        '''Finds .csv and .hdf5 filepaths within any subdirectories of the data
+        directory path specified when the class is initiated (see class init), and
+        appends them to lists'''
         print('Fetching data paths from directory')
         self.metadata_paths = []
         self.data_paths = []
@@ -74,6 +106,8 @@ class DataPreprocessing():
             self.data_paths.append(file)
 
     def _parse_metadata_csvs(self):
+        '''Reads metadata from the individual STEAD dataset csv files and
+        combines it into a single dataframe.'''
         print('Parsing metadata from csv files')
         metadata_dfs = []
         for i, path in enumerate(self.metadata_paths):
@@ -94,6 +128,16 @@ class DataPreprocessing():
         )
 
     def _get_traces_subsample(self, subsample_n):
+        '''Collects a subsample of the seismic traces from the full STEAD dataset.
+
+        Parameters
+        ----------
+        subsample_n : int
+            The number of signal traces to randomly sample from the full dataset
+
+        Returns
+        -------
+        pd.DataFrame containing metadata for the subsample of signal traces'''
         print('Fetching subsample of traces from hdf5 files')
         subsample_metadata = self.full_metadata.sample(subsample_n, random_state=0)
         return subsample_metadata
@@ -140,8 +184,8 @@ class DataPreprocessing():
                 index_to_remove = self.subsample_metadata[self.subsample_metadata['trace_name'] == trace_name].index
                 self.subsample_metadata = self.subsample_metadata.drop(index_to_remove)
 
-        return self.subsample_imgs, self.subsample_metadata
+        return self.subsample_traces, self.subsample_imgs, self.subsample_metadata
 
 
 preproc = DataPreprocessing(DATA_DIR_PATH)
-imgs, metadata = preproc.preprocess(subsample_n=SUBSAMPLE_N)
+raw_signals, imgs, metadata = preproc.preprocess(subsample_n=SUBSAMPLE_N)
