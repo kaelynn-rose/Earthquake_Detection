@@ -1,6 +1,7 @@
 
 
 import pathlib
+import io
 
 from pathlib import Path
 
@@ -8,6 +9,8 @@ import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+from PIL import Image
 
 DATA_DIR_PATH = '/Users/kaelynnrose/Documents/DATA_SCIENCE/data'
 SUBSAMPLE_N = 50000 # the number of signal traces to sample from the full dataset
@@ -71,7 +74,7 @@ trace_names = traces_df['trace_name']
 
 traces = {}
 for i, path in enumerate(data_paths):
-    print(f'Parsing traces from file at path {i}/{len(data_paths)}')
+    print(f'Parsing traces from file at path # {i}/{len(data_paths)}')
     h5f = h5py.File(path, mode='r')
     for _, trace_name in enumerate(tqdm(trace_names)):
         try:
@@ -84,5 +87,5 @@ for i, path in enumerate(data_paths):
 imgs = []
 keys = []
 for key, val in traces.items():
-
+    img = plot_spectrogram_from_trace(val)
 
