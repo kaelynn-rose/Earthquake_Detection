@@ -170,10 +170,10 @@ class DataPreprocessing():
         dict : A dictionary where the keys are the trace name strings, and the values
         are the corresponding seismic signal trace data arrays (np.array format)'''
         traces = {}
-        for i, path in enumerate(self.data_paths):
-            print(f'Parsing traces from file at path # {i}/{len(self.data_paths)}')
+        print(f'Parsing traces from h5py filepaths')
+        for i, path in enumerate(tqdm(self.data_paths)):
             h5f = h5py.File(path, mode='r')
-            for _, trace_name in enumerate(tqdm(trace_names)):
+            for _, trace_name in enumerate(trace_names):
                 try:
                     trace = np.array(h5f.get(f'data/{trace_name}'))
                     if self._is_populated(trace):
@@ -216,8 +216,10 @@ class DataPreprocessing():
         self.subsample_traces = self._read_h5py_files(subsample_trace_names)
 
         # Convert the signal traces into spectrogram images and then store the images in an array
-        print('Creating spectrograms from signal traces and saving to array')
+        print('Creating spectrograms from signal traces and saving to array for model training')
         self.subsample_imgs = []
+        self.subsample_metadata.set_index('trace_name', drop=True, inplace=True)
+
         for trace_name, trace in tqdm(self.subsample_traces.items()):
             try:
                 img = self.plot_spectrogram(trace)  # Convert the signal to a spectrogram image
@@ -234,8 +236,12 @@ class DataPreprocessing():
                     f'Unable to plot or save spectrogram array for trace {trace_name}.'
                     f'Dropping this trace from the dataset and metadata. \n Exception: {e}'
                 )
-                index_to_remove = self.subsample_metadata[self.subsample_metadata['trace_name'] == trace_name].index
-                self.subsample_metadata = self.subsample_metadata.drop(index_to_remove)
+                del self.subsample_traces[trace_name]
+                #index_to_remove = self.subsample_metadata[self.subsample_metadata['trace_name'] == trace_name].index
+                #self.subsample_metadata = self.subsample_metadata.drop(index_to_remove)
+
+        new_metadata_order = self.subsample_traces.keys()
+        self.subsample_metadata = self.subsample_metadata.loc[new_metadata_order]
 
         return self.subsample_traces, self.subsample_imgs, self.subsample_metadata
 
