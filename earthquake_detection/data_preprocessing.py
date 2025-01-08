@@ -18,7 +18,7 @@ into either waveform plots or spectrogram plots, for analysis purposes.
 Examples
 --------
 > preproc = DataPreprocessing(YOUR_DATA_DIR_PATH_HERE)
-> raw_signals, imgs, metadata = preproc.preprocess(subsample_n=SUBSAMPLE_N)
+> raw_signals, imgs, metadata = preproc.preprocess(subsample_n=5000)
 '''
 
 
@@ -240,6 +240,7 @@ class DataPreprocessing():
                 #index_to_remove = self.subsample_metadata[self.subsample_metadata['trace_name'] == trace_name].index
                 #self.subsample_metadata = self.subsample_metadata.drop(index_to_remove)
 
+        # re-order metadata to match order of images
         new_metadata_order = self.subsample_traces.keys()
         self.subsample_metadata = self.subsample_metadata.loc[new_metadata_order]
 
