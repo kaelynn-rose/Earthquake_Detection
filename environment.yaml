@@ -1,0 +1,21 @@
+name: earthquake-detection
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - boto3=1.34.69
+  - cartopy=0.22.0
+  - fsspec=2024.6.1
+  - ipykernel=6.29.5
+  - jupyterlab=4.2.5
+  - matplotlib=3.9.2
+  - numpy=1.26.4
+  - pandas=2.2.3
+  - pillow=11.0.0
+  - pip=24.2
+  - python=3.12.3
+  - requests==2.32.3
+  - s3fs=2024.6.1
+  - tqdm=4.66.5
+  - pip:
+    - h5py==3.12.1
