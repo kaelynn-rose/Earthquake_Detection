@@ -182,7 +182,12 @@ class DataPreprocessing():
                     pass
         return traces
 
-    def preprocess(self, subsample_n):
+    def create_traintest_images(
+            self,
+            subsample_n,
+            create_waveform_imgs=True,
+            create_spectrogram_imgs=True
+    ):
         '''Preprocesses signal data and metadata for the csv and h5py data files
         that are located in the directory given in the class init (see above).
         First fetches the data paths of the individual files in the directory,
@@ -193,6 +198,10 @@ class DataPreprocessing():
 
         Parameters
         ----------
+        create_waveform_imgs : bool
+            Whether to create and save waveform images of the selected signal traces
+        create_spectrogram_imgs : bool
+            Whether to create and save sepctrogram images of the selected signal traces
         subsample_n : int
             The number of traces to randomly sample from the complete dataset (all
             of the h5py files contained in the directory path specified in the class init)
@@ -203,9 +212,12 @@ class DataPreprocessing():
             A dictionary where the keys are the trace name strings, and the values
             are the corresponding seismic signal trace data arrays (np.array format).
             Subsample of size subsample_n from the full dataset.
-        subsample_imgs : list of numpy.ndarray
-            A list containing arrays for each signal trace. Corresponds to the order
-            of metadata in subsample_metadata
+        subsample_waveform_imgs : list of numpy.ndarray
+            A list where each element is a waveform image of the trace in array format.
+            Corresponds to the order of metadata in subsample_metadata
+        subsample_spectrogram_imgs : list of numpy.ndarray
+            A list where each element is a spectrogram image of the trace in array format.
+            Corresponds to the order of metadata in subsample_metadata
         subsample_metadata : pd.DataFrame
             The metadata corresponding to the signal traces in subsample_images'''
         print(f'Data preprocessing for subsample of signal data of size {subsample_n}')
@@ -217,33 +229,70 @@ class DataPreprocessing():
 
         # Convert the signal traces into spectrogram images and then store the images in an array
         print('Creating spectrograms from signal traces and saving to array for model training')
-        self.subsample_imgs = []
+        self.subsample_waveform_dict = {}
+        self.subsample_spectrogram_dict = {}
         self.subsample_metadata.set_index('trace_name', drop=True, inplace=True)
+        self.failures = []
 
         for trace_name, trace in tqdm(self.subsample_traces.items()):
-            try:
-                img = self.plot_spectrogram(trace)  # Convert the signal to a spectrogram image
-                buf = BytesIO()
-                img.savefig(buf, format='png') # Save the plot to a BytesIO buffer, to avoid saving images to disk
-                buf.seek(0) # Rewind the buffer so we can read the contents from the start
-                img = Image.open(buf) # Open the image from the buffer
-                img_arr = np.array(img)
-                self.subsample_imgs.append(img_arr)
-                img.close()
-                plt.close()
-            except Exception as e:
-                print(
-                    f'Unable to plot or save spectrogram array for trace {trace_name}.'
-                    f'Dropping this trace from the dataset and metadata. \n Exception: {e}'
-                )
-                del self.subsample_traces[trace_name]
-                #index_to_remove = self.subsample_metadata[self.subsample_metadata['trace_name'] == trace_name].index
-                #self.subsample_metadata = self.subsample_metadata.drop(index_to_remove)
+            if create_waveform_imgs:
+                try:
+                    img = self.plot_waveform(trace)  # Convert the signal to a spectrogram image
+                    buf = BytesIO()
+                    img.savefig(buf, format='png') # Save the plot to a BytesIO buffer, to avoid saving images to disk
+                    buf.seek(0) # Rewind the buffer so we can read the contents from the start
+                    img = Image.open(buf) # Open the image from the buffer
+                    img_arr = np.array(img)
+                    self.subsample_waveform_dict[trace_name] = img_arr
+                    #self.subsample_imgs.append(img_arr)
+                    img.close()
+                    plt.close()
+                except Exception as e:
+                    print(
+                        f'Unable to plot or save waveform array for trace {trace_name}.'
+                        f'Dropping this trace from the dataset and metadata. \n Exception: {e}'
+                    )
+                    self.subsample_waveform_dict[trace_name] = None
+                    self.failures.append(trace_name)
+            if create_spectrogram_imgs:
+                try:
+                    img = self.plot_spectrogram(trace)  # Convert the signal to a spectrogram image
+                    buf = BytesIO()
+                    img.savefig(buf, format='png') # Save the plot to a BytesIO buffer, to avoid saving images to disk
+                    buf.seek(0) # Rewind the buffer so we can read the contents from the start
+                    img = Image.open(buf) # Open the image from the buffer
+                    img_arr = np.array(img)
+                    self.subsample_spectrogram_dict[trace_name] = img_arr
+                    #self.subsample_imgs.append(img_arr)
+                    img.close()
+                    plt.close()
+                except Exception as e:
+                    print(
+                        f'Unable to plot or save spectrogram array for trace {trace_name}.'
+                        f'Dropping this trace from the dataset and metadata. \n Exception: {e}'
+                    )
+                    self.subsample_spectrogram_dict[trace_name] = None
+                    self.failures.append(trace_name)
 
         # re-order metadata to match order of images
         new_metadata_order = self.subsample_traces.keys()
         self.subsample_metadata = self.subsample_metadata.loc[new_metadata_order]
 
-        return self.subsample_traces, self.subsample_imgs, self.subsample_metadata
+        # remove traces, images, and metadata if any failures occurred
+        if len(self.failures) > 0:
+            for trace_name in set(self.failures):
+                if trace_name in self.subsample_waveform_dict.keys():
+                    del self.subsample_waveform_dict[trace_name]
+                if trace_name in self.subsample_spectrogram_dict.keys():
+                    del self.subsample_spectrogram_dict[trace_name]
+                if trace_name in self.subsample_traces.keys():
+                    del self.subsample_traces[trace_name]
+                if trace_name in list(self.subsample_metadata.index):
+                    self.subsample_metadata = self.subsample_metadata.drop(trace_name)
+
+        self.subsample_waveform_imgs = list(self.subsample_waveform_dict.values())
+        self.subsample_spectrogram_imgs = list(self.subsample_spectrogram_dict.values())
+
+        return self.subsample_traces, self.subsample_waveform_imgs, self.subsample_spectrogram_imgs, self.subsample_metadata
 
 
