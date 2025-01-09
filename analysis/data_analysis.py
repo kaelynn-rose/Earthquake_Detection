@@ -84,8 +84,18 @@ for i, path in enumerate(data_paths):
         except Exception as e:
             pass
 
+# Convert the signal traces into spectrogram images and then store the images in an array
 imgs = []
 keys = []
-for key, val in traces.items():
-    img = plot_spectrogram_from_trace(val)
+for key, val in tqdm(traces.items()):
+    img = plot_spectrogram_from_trace(val)  # Convert the signal to a spectrogram image
+    buf = BytesIO()
+    img.savefig(buf, format='png') # Save the plot to a BytesIO buffer, to avoid saving images to disk
+    buf.seek(0) # Rewind the buffer so we can read the contents from the start
+    img = Image.open(buf) # Open the image from the buffer
+    img_arr = np.array(img)
+    imgs.append(img_arr)
+    keys.append(key)
+    img.close()
+
 
