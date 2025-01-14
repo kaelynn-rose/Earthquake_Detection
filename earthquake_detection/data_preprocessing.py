@@ -29,6 +29,7 @@ from pathlib import Path
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
+import objgraph
 import pandas as pd
 
 from PIL import Image
@@ -97,7 +98,21 @@ class DataPreprocessing():
         plt.gca().set_axis_off()
         plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
         plt.margins(0,0)
-        return fig
+
+        buf = BytesIO()
+        fig.savefig(buf, format='png') # Save the plot to a BytesIO buffer, to avoid saving images to disk
+        buf.seek(0) # Rewind the buffer so we can read the contents from the start
+        img = Image.open(buf) # Open the image from the buffer
+        img_arr = np.array(img)
+        if img_arr.shape[2] == 4:
+            img_arr = img_arr[:,:,:3] # drop alpha channel if there is one
+        plt.close(fig)
+        plt.ioff()
+        del img
+        del fig
+        del buf
+
+        return img_arr
 
     def plot_waveform(self, trace, img_width=3, img_height=2, dpi=100):
         '''Plots a waveform image for the Z-axis of a seismic signal trace, given a
@@ -112,13 +127,28 @@ class DataPreprocessing():
         -------
         matplotlib.pyplot figure showing the waveform of the signal trace'''
         fig, ax = plt.subplots(figsize=(img_width,img_height), dpi=dpi)
-        ax.plot(np.linspace(0,60,6000), trace[:,2], color='k', linewidth=1) # select only the z-axis component of the signal
+        x = np.linspace(0,60,6000)
+        ax.plot(x, trace[:,2], color='k', linewidth=1) # select only the z-axis component of the signal
         ax.set_xlim([0,60])
         ax.axis('off')
         plt.gca().set_axis_off()
         plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
         plt.margins(0,0)
-        return fig
+
+        buf = BytesIO()
+        fig.savefig(buf, format='png') # Save the plot to a BytesIO buffer, to avoid saving images to disk
+        buf.seek(0) # Rewind the buffer so we can read the contents from the start
+        img = Image.open(buf) # Open the image from the buffer
+        img_arr = np.array(img)
+        if img_arr.shape[2] == 4:
+            img_arr = img_arr[:,:,:3] # drop alpha channel if there is one
+        plt.close(fig)
+        plt.ioff()
+        del img
+        del fig
+        del buf
+
+        return img_arr
 
     def _fetch_datapaths_from_dir(self):
         '''Finds .csv and .hdf5 filepaths within any subdirectories of the data
@@ -225,17 +255,9 @@ class DataPreprocessing():
         i = 0
         for trace_name, trace in tqdm(self.subsample_traces.items()):
             try:
-                img = self.plot_waveform(trace)  # Convert the signal to a spectrogram image
-                buf = BytesIO()
-                img.savefig(buf, format='png') # Save the plot to a BytesIO buffer, to avoid saving images to disk
-                buf.seek(0) # Rewind the buffer so we can read the contents from the start
-                img = Image.open(buf) # Open the image from the buffer
-                img_arr = np.array(img)
-                if img_arr.shape[2] == 4:
-                    img_arr = img_arr[:,:,:3] # drop alpha channel if there is one
+                img_arr = self.plot_waveform(trace)  # Convert the signal to a spectrogram image
                 self.subsample_waveform_imgs[i] = img_arr
-                img.close()
-                plt.close()
+                del img_arr
             except Exception as e:
                 print(
                     f'Unable to plot waveform for {trace_name}.'
@@ -275,17 +297,10 @@ class DataPreprocessing():
         i = 0
         for trace_name, trace in tqdm(self.subsample_traces.items()):
             try:
-                img = self.plot_spectrogram(trace)  # Convert the signal to a spectrogram image
-                buf = BytesIO()
-                img.savefig(buf, format='png') # Save the plot to a BytesIO buffer, to avoid saving images to disk
-                buf.seek(0) # Rewind the buffer so we can read the contents from the start
-                img = Image.open(buf) # Open the image from the buffer
-                img_arr = np.array(img)
-                if img_arr.shape[2] == 4:
-                    img_arr = img_arr[:,:,:3] # drop alpha channel if there is one
+                img_arr = self.plot_spectrogram(trace)  # Convert the signal to a spectrogram image
                 self.subsample_spectrogram_imgs[i] = img_arr
-                img.close()
-                plt.close()
+                del img_arr
+
             except Exception as e:
                 print(
                     f'Unable to plot spectrogram for {trace_name}.'
@@ -293,6 +308,7 @@ class DataPreprocessing():
                 )
             if i % 1000 == 0:
                 gc.collect() # garbage collection of deleted objects to free memory
+
             i += 1
 
         return self.subsample_spectrogram_imgs
