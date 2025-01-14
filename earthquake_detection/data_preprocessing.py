@@ -8,18 +8,20 @@ This module contains functions that:
 1. Fetch the STEAD data from its locally saved filepaths
 2. Parses the seismic signal metadata from the csv files
 3. Reads a random subsample of the seismic traces from the .hdf5 formatted data files
-4. Transforms the seismic signals into spectrogram (a visual representation of the
-   spectrum of frequencies of a signal as it varies with time) plots
-5. Saves the spectrogram plots to a np.array to be used as model training data
+4. Transforms the seismic signals into waveform and spectrogram (a visual representation
+   of the spectrum of frequencies of a signal as it varies with time) plots
+5. Saves the waveform and spectrogram plots to a np.array to be used as model training data
 
 Additionally, this module contains utilities for converting the seismic signal traces
 into either waveform plots or spectrogram plots, for analysis purposes.
 
 Examples
 --------
-> preproc = DataPreprocessing(YOUR_DATA_DIR_PATH_HERE)
-> raw_signals, imgs, metadata = preproc.preprocess(subsample_n=5000)
-'''
+> preproc = DataPreprocessing(YOUR_DATA_DIR_PATH_HERE, SUBSAMPLE_N=5000)
+> raw_signals = preproc.subsample_traces # access raw signals
+> metadata = preproc.subsample_metadata # access metadata
+> waveform_imgs = preproc.create_waveform_images(img_width=3, img_height=2, img_dpi=100)
+> spectrogram_imgs = preproc.create_spectrogram_images(img_width=3, img_height=2, img_dpi=100) '''
 
 import gc
 
