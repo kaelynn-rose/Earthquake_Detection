@@ -41,3 +41,8 @@ ipython_config.py
 
 # pyenv
 .python-version
+
+# Ignore model files
+*.keras
+*.h5
+

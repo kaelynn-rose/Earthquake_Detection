@@ -42,7 +42,7 @@ class DataPreprocessing():
     '''A class to perform data preprocessing to fetch data from files of the
     STEAD seismic signal dataset and convert a subsample of signal traces to
     spectrograms for ML model training. See module docstring above.'''
-    def __init__(self, data_dir_path, subsample_n):
+    def __init__(self, data_dir_path, subsample_n, weighted):
         '''Initializes the DataPreprocessing object
 
         Parameters
@@ -51,13 +51,17 @@ class DataPreprocessing():
             The local directory to search for the STEAD dataset csv and h5py files
         subsample_n : int
             The number of traces to randomly sample from the complete dataset (all
-            of the h5py files contained in data_dir_path)'''
+            of the h5py files contained in data_dir_path)
+        weighted : bool
+            Whether to weight the likelihood of rows being selected to the random
+            sample based on the total number of each label in the dataset'''
         self.data_dir_path = data_dir_path
         self.subsample_n = subsample_n
+        self.weighted = weighted
 
         self._fetch_datapaths_from_dir()
         self. _parse_metadata_csvs()
-        self.subsample_metadata = self._get_traces_subsample(self.subsample_n)
+        self.subsample_metadata = self._get_traces_subsample()
         subsample_trace_names = list(self.subsample_metadata.index)
         self.subsample_traces = self._read_h5py_files(subsample_trace_names)
 
@@ -187,19 +191,28 @@ class DataPreprocessing():
             f'Number of noise traces: {num_noise}'
         )
 
-    def _get_traces_subsample(self, subsample_n):
+    def _get_traces_subsample(self):
         '''Collects a subsample of the seismic traces from the full STEAD dataset.
 
         Parameters
         ----------
         subsample_n : int
             The number of signal traces to randomly sample from the full dataset
+        weighted : bool
+            Whether to weight the likelihood of rows being selected to the random
+            sample based on the total number of each label in the dataset
 
         Returns
         -------
         pd.DataFrame containing metadata for the subsample of signal traces'''
         print('Fetching subsample of traces from hdf5 files')
-        subsample_metadata = self.full_metadata.sample(subsample_n, random_state=0)
+        if self.weighted:
+            print('Weighting random sample based on category label')
+            label_counts = self.full_metadata['trace_category'].value_counts()
+            self.full_metadata['weight_for_subsample'] = 1./self.full_metadata.groupby('trace_category')['trace_category'].transform('count')
+            subsample_metadata = self.full_metadata.sample(self.subsample_n, weights=self.full_metadata['weight_for_subsample'], random_state=0)
+        else:
+            subsample_metadata = self.full_metadata.sample(self.subsample_n, random_state=0)
         subsample_metadata.set_index('trace_name', drop=True, inplace=True)
         return subsample_metadata
 
