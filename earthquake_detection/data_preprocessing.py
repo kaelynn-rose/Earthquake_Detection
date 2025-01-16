@@ -120,7 +120,7 @@ class DataPreprocessing():
 
         return img_arr
 
-    def plot_waveform(self, trace, img_width=3, img_height=2, dpi=100):
+    def plot_waveform(self, trace, img_width=6, img_height=2, dpi=100):
         '''Plots a waveform image for the Z-axis of a seismic signal trace, given a
         numpy.ndarray with 3 columns, the X, Y, and Z axes.
 
