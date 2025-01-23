@@ -16,6 +16,8 @@ dependencies:
   - python=3.12.3
   - requests==2.32.3
   - s3fs=2024.6.1
+  - scikit-learn=1.5.2
+  - tensorflow=2.17.0
   - tqdm=4.66.5
   - pip:
     - h5py==3.12.1
