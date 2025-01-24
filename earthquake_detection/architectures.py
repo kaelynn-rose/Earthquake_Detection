@@ -53,7 +53,7 @@ def build_compile_classification_cnn(learning_rate=1e-6, loss='binary_crossentro
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
     opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
-    model.compile(optimizer=opt, loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer=opt, loss=loss, metrics=metrics)
     return model
 
 
