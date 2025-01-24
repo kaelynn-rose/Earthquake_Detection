@@ -39,7 +39,9 @@ def image_preprocessing(image, image_size):
     return image
 
 
-def build_compile_classification_cnn(learning_rate=1e-6, loss='binary_crossentropy', metrics=['accuracy']):
+def build_compile_classification_cnn(
+    learning_rate=1e-6, loss='binary_crossentropy', metrics=['accuracy']
+):
     model = tf.keras.Sequential([
         tf.keras.layers.Conv2D(32, kernel_size=(3, 3), activation='relu', padding='same'),
         tf.keras.layers.MaxPooling2D((2, 2)),
@@ -57,7 +59,9 @@ def build_compile_classification_cnn(learning_rate=1e-6, loss='binary_crossentro
     return model
 
 
-def build_compile_regression_cnn(learning_rate=1e-5, loss='mse', metrics=['mae']):
+def build_compile_regression_cnn(
+    learning_rate=1e-5, loss='mse', metrics=['mae']
+):
     model = tf.keras.Sequential([
         tf.keras.layers.Conv2D(64, kernel_size=(5, 5), activation = 'relu', padding = 'same'),
         tf.keras.layers.MaxPool2D(2,2),
@@ -65,6 +69,38 @@ def build_compile_regression_cnn(learning_rate=1e-5, loss='mse', metrics=['mae']
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dense(16, activation='relu'),
         tf.keras.layers.Dense(1)
+    ])
+    opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+    model.compile(optimizer=opt, loss=loss, metrics=metrics)
+    return model
+
+
+def build_compile_classification_lstm(
+    input_shape, learning_rate=1e-5, loss='binary_crossentropy', metrics=['accuracy']
+):
+    model = tf.keras.Sequential([
+        tf.keras.layers.SimpleRNN(64, input_shape=input_shape, return_sequences=True),
+        tf.keras.layers.LSTM(64, input_shape=input_shape, return_sequences=True),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.LSTM(32, return_sequences=False),
+        tf.keras.layers.Dense(16, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+    ])
+    opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+    model.compile(optimizer=opt, loss=loss, metrics=metrics)
+    return model
+
+
+def build_compile_regression_lstm(
+    input_shape, learning_rate=1e-4, loss='mse', metrics=['mae']
+):
+    model = tf.keras.Sequential([
+        tf.keras.layers.LSTM(32, input_shape=input_shape, return_sequences=True),
+        tf.keras.layers.LSTM(32, return_sequences=False),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Dense(32, activation='relu'),
+        tf.keras.layers.Dense(16, activation='relu'),
+        tf.keras.layers.Dense(1, activation='linear')
     ])
     opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
     model.compile(optimizer=opt, loss=loss, metrics=metrics)

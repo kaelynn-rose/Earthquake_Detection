@@ -21,3 +21,4 @@ dependencies:
   - tqdm=4.66.5
   - pip:
     - h5py==3.12.1
+    - transformers==4.48.1
