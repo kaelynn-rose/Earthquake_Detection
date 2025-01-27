@@ -68,6 +68,8 @@ class DataPreprocessing():
         new_metadata_order = self.subsample_traces.keys()
         self.subsample_metadata = self.subsample_metadata.loc[new_metadata_order]
 
+        plt.ioff()
+
     def _is_populated(self, arr):
         '''Check if array is empty or has only None (dtype=object).
 
@@ -243,7 +245,7 @@ class DataPreprocessing():
         return traces
 
 
-    def create_waveform_images(self, img_width=3, img_height=2, img_dpi=100):
+    def create_waveform_images(self, img_width=6, img_height=2, img_dpi=100):
         '''Iterates through the signal traces, plotting a waveform image for each.
         Saves each created image to an array to be used for model training.
 
@@ -270,7 +272,13 @@ class DataPreprocessing():
         i = 0
         for trace_name, trace in tqdm(self.subsample_traces.items()):
             try:
-                img_arr = self.plot_waveform(trace)  # Convert the signal to a spectrogram image
+                # Convert the signal to a spectrogram image
+                img_arr = self.plot_waveform(
+                    trace,
+                    img_width=img_width,
+                    img_height=img_height,
+                    dpi=img_dpi
+                    )
                 self.subsample_waveform_imgs[i] = img_arr
                 del img_arr
             except Exception as e:
@@ -312,7 +320,13 @@ class DataPreprocessing():
         i = 0
         for trace_name, trace in tqdm(self.subsample_traces.items()):
             try:
-                img_arr = self.plot_spectrogram(trace)  # Convert the signal to a spectrogram image
+                # Convert the signal to a spectrogram image
+                img_arr = self.plot_spectrogram(
+                    trace,
+                    img_width=img_width,
+                    img_height=img_height,
+                    dpi=100
+                )
                 self.subsample_spectrogram_imgs[i] = img_arr
                 del img_arr
 
