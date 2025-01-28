@@ -21,7 +21,7 @@ def callbacks_setup(model_tag, epochs):
     reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(
         monitor='val_loss',
         factor=0.1,                # the factor by which the learning rate will be reduced
-        patience=4,                # number of epochs to wait for improvement
+        patience=3,                # number of epochs to wait for improvement
         verbose=1
     )
 
@@ -43,14 +43,11 @@ def build_compile_classification_cnn(
     learning_rate=1e-6, loss='binary_crossentropy', metrics=['accuracy']
 ):
     model = tf.keras.Sequential([
-        tf.keras.layers.Conv2D(32, kernel_size=(3, 3), activation='relu', padding='same'),
+        tf.keras.layers.Conv2D(32, kernel_size=(5, 5), activation='relu', padding='same'),
         tf.keras.layers.MaxPooling2D((2, 2)),
         tf.keras.layers.Dropout(0.25),
-        tf.keras.layers.Conv2D(64, kernel_size=(5, 5), activation='relu', padding='same'),
-        tf.keras.layers.MaxPooling2D((2, 2)),
-        tf.keras.layers.Dropout(0.50),
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.Dense(16, activation='relu'),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
