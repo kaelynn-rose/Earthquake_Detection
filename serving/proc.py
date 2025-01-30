@@ -40,17 +40,10 @@ img = DataPreprocessing.plot_spectrogram(signal)
 img = Image.fromarray(img).resize((100,150))
 img = np.array(img) / 255.0
 
+# Use this for prediction straight from model artifact
 imgs = np.expand_dims(img, axis=0)
 
-imgs = []
-for i in range(0,1):
-  signal = raw_signals[i][:,2]
-  img = DataPreprocessing.plot_spectrogram(signal)
-  img = Image.fromarray(img).resize((100,150))
-  img = np.array(img) / 255.0
-  imgs.append(img)
-imgs = np.squeeze(np.array(imgs), axis=(0,)).tolist()
-
+# Use this for prediction with model served with tensorflow serving
 signal = raw_signals[i][:,2]
 img = DataPreprocessing.plot_spectrogram(signal)
 img = Image.fromarray(img).resize((100,150))

@@ -18,8 +18,8 @@ def prepare_datasets(imgs, labels, preproc_func=None, preproc_func_kwargs=None, 
     if labels.ndim == 1:
         labels = labels.reshape(-1, 1)
 
-    X_train, X_test, y_train, y_test = train_test_split(imgs, labels, random_state=0, test_size=0.2)
-    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, random_state=0, test_size=0.2)
+    X_train, X_test, y_train, y_test = train_test_split(imgs, labels, random_state=0, test_size=0.1)
+    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, random_state=0, test_size=0.1)
 
     if use_scaler:
         scaler = RobustScaler()
