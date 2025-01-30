@@ -31,12 +31,82 @@ from pathlib import Path
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
-import objgraph
 import pandas as pd
 
 from PIL import Image
 from tqdm import tqdm
 
+
+def plot_spectrogram(trace, img_width=3, img_height=2, dpi=100):
+    '''Plots a spectrogram image for the Z-axis of a seismic signal trace, given a
+    numpy.ndarray with 3 columns, the X, Y, and Z axes.
+
+    Parameters
+    ----------
+    trace : np.array()
+        The raw seismic signal array to plot the spectrogram image of
+
+    Returns
+    -------
+    matplotlib.pyplot figure showing the spectrogram of the signal trace'''
+    fig, ax = plt.subplots(figsize=(img_width,img_height), dpi=dpi)
+    ax.specgram(trace, Fs=100, NFFT=256, cmap='gray', vmin=-10, vmax=25)
+    ax.set_xlim([0,60])
+    ax.axis('off')
+    plt.gca().set_axis_off()
+    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+    plt.margins(0,0)
+
+    buf = BytesIO()
+    fig.savefig(buf, format='png') # Save the plot to a BytesIO buffer, to avoid saving images to disk
+    buf.seek(0) # Rewind the buffer so we can read the contents from the start
+    img = Image.open(buf) # Open the image from the buffer
+    img_arr = np.array(img)
+    if img_arr.shape[2] == 4:
+        img_arr = img_arr[:,:,:3] # drop alpha channel if there is one
+    plt.close(fig)
+    plt.ioff()
+    del img
+    del fig
+    del buf
+
+    return img_arr
+
+def plot_waveform(trace, img_width=3, img_height=1, dpi=100):
+    '''Plots a waveform image for the Z-axis of a seismic signal trace, given a
+    numpy.ndarray with 3 columns, the X, Y, and Z axes.
+
+    Parameters
+    ----------
+    trace : numpy.ndarray
+        The raw seismic signal array to plot the waveform image of
+
+    Returns
+    -------
+    matplotlib.pyplot figure showing the waveform of the signal trace'''
+    fig, ax = plt.subplots(figsize=(img_width,img_height), dpi=dpi)
+    x = np.linspace(0,60,6000)
+    ax.plot(x, trace, color='k', linewidth=1)
+    ax.set_xlim([0,60])
+    ax.axis('off')
+    plt.gca().set_axis_off()
+    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
+    plt.margins(0,0)
+
+    buf = BytesIO()
+    fig.savefig(buf, format='png') # Save the plot to a BytesIO buffer, to avoid saving images to disk
+    buf.seek(0) # Rewind the buffer so we can read the contents from the start
+    img = Image.open(buf) # Open the image from the buffer
+    img_arr = np.array(img)
+    if img_arr.shape[2] == 4:
+        img_arr = img_arr[:,:,:3] # drop alpha channel if there is one
+    plt.close(fig)
+    plt.ioff()
+    del img
+    del fig
+    del buf
+
+    return img_arr
 
 class DataPreprocessing():
     '''A class to perform data preprocessing to fetch data from files of the
@@ -68,6 +138,8 @@ class DataPreprocessing():
         new_metadata_order = self.subsample_traces.keys()
         self.subsample_metadata = self.subsample_metadata.loc[new_metadata_order]
 
+        plt.ioff()
+
     def _is_populated(self, arr):
         '''Check if array is empty or has only None (dtype=object).
 
@@ -84,77 +156,6 @@ class DataPreprocessing():
         if arr.dtype == object and np.all(arr == None):  # Check if array contains only None values
             return False
         return True
-
-    def plot_spectrogram(self, trace, img_width=3, img_height=2, dpi=100):
-        '''Plots a spectrogram image for the Z-axis of a seismic signal trace, given a
-        numpy.ndarray with 3 columns, the X, Y, and Z axes.
-
-        Parameters
-        ----------
-        trace : np.array()
-            The raw seismic signal array to plot the spectrogram image of
-
-        Returns
-        -------
-        matplotlib.pyplot figure showing the spectrogram of the signal trace'''
-        fig, ax = plt.subplots(figsize=(img_width,img_height), dpi=dpi)
-        ax.specgram(trace[:,2], Fs=100, NFFT=256, cmap='gray', vmin=-10, vmax=25) # select only the z-axis component of the signal
-        ax.set_xlim([0,60])
-        ax.axis('off')
-        plt.gca().set_axis_off()
-        plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
-        plt.margins(0,0)
-
-        buf = BytesIO()
-        fig.savefig(buf, format='png') # Save the plot to a BytesIO buffer, to avoid saving images to disk
-        buf.seek(0) # Rewind the buffer so we can read the contents from the start
-        img = Image.open(buf) # Open the image from the buffer
-        img_arr = np.array(img)
-        if img_arr.shape[2] == 4:
-            img_arr = img_arr[:,:,:3] # drop alpha channel if there is one
-        plt.close(fig)
-        plt.ioff()
-        del img
-        del fig
-        del buf
-
-        return img_arr
-
-    def plot_waveform(self, trace, img_width=6, img_height=2, dpi=100):
-        '''Plots a waveform image for the Z-axis of a seismic signal trace, given a
-        numpy.ndarray with 3 columns, the X, Y, and Z axes.
-
-        Parameters
-        ----------
-        trace : numpy.ndarray
-            The raw seismic signal array to plot the waveform image of
-
-        Returns
-        -------
-        matplotlib.pyplot figure showing the waveform of the signal trace'''
-        fig, ax = plt.subplots(figsize=(img_width,img_height), dpi=dpi)
-        x = np.linspace(0,60,6000)
-        ax.plot(x, trace[:,2], color='k', linewidth=1) # select only the z-axis component of the signal
-        ax.set_xlim([0,60])
-        ax.axis('off')
-        plt.gca().set_axis_off()
-        plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
-        plt.margins(0,0)
-
-        buf = BytesIO()
-        fig.savefig(buf, format='png') # Save the plot to a BytesIO buffer, to avoid saving images to disk
-        buf.seek(0) # Rewind the buffer so we can read the contents from the start
-        img = Image.open(buf) # Open the image from the buffer
-        img_arr = np.array(img)
-        if img_arr.shape[2] == 4:
-            img_arr = img_arr[:,:,:3] # drop alpha channel if there is one
-        plt.close(fig)
-        plt.ioff()
-        del img
-        del fig
-        del buf
-
-        return img_arr
 
     def _fetch_datapaths_from_dir(self):
         '''Finds .csv and .hdf5 filepaths within any subdirectories of the data
@@ -243,7 +244,7 @@ class DataPreprocessing():
         return traces
 
 
-    def create_waveform_images(self, img_width=3, img_height=2, img_dpi=100):
+    def create_waveform_images(self, img_width=6, img_height=2, img_dpi=100):
         '''Iterates through the signal traces, plotting a waveform image for each.
         Saves each created image to an array to be used for model training.
 
@@ -270,7 +271,13 @@ class DataPreprocessing():
         i = 0
         for trace_name, trace in tqdm(self.subsample_traces.items()):
             try:
-                img_arr = self.plot_waveform(trace)  # Convert the signal to a spectrogram image
+                # Convert the signal to a spectrogram image
+                img_arr = plot_waveform(
+                    trace[:,2], # select only the z-axis component of the signal
+                    img_width=img_width,
+                    img_height=img_height,
+                    dpi=img_dpi
+                    )
                 self.subsample_waveform_imgs[i] = img_arr
                 del img_arr
             except Exception as e:
@@ -312,7 +319,13 @@ class DataPreprocessing():
         i = 0
         for trace_name, trace in tqdm(self.subsample_traces.items()):
             try:
-                img_arr = self.plot_spectrogram(trace)  # Convert the signal to a spectrogram image
+                # Convert the signal to a spectrogram image
+                img_arr = plot_spectrogram(
+                    trace[:,2], # select only the z-axis component of the signal
+                    img_width=img_width,
+                    img_height=img_height,
+                    dpi=100
+                )
                 self.subsample_spectrogram_imgs[i] = img_arr
                 del img_arr
 
