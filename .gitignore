@@ -43,6 +43,7 @@ ipython_config.py
 .python-version
 
 # Ignore model files
+**/models/
 *.keras
 *.h5
 
