@@ -3,6 +3,9 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
+CLASSIFICATION_ENDPOINT = 'http://localhost:8501/v1/models/model:predict'
+MAGNITUDE_ENDPOINT = '' #TODO
+HEADERS = {"Content-Type": "application/json"}
 
 class PredictionRequest(BaseModel):
     """Validation model for the incoming request payload."""

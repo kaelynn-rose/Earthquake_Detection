@@ -34,13 +34,13 @@ docker run -p 8501:8501 --name=earthquake-detection-model \
   -e MODEL_NAME=model -t tensorflow/serving
 
 
-signal = raw_signals[0][:,2]
 
+
+# Use this for prediction straight from model artifact
+signal = raw_signals[i][:,2]
 img = DataPreprocessing.plot_spectrogram(signal)
 img = Image.fromarray(img).resize((100,150))
 img = np.array(img) / 255.0
-
-# Use this for prediction straight from model artifact
 imgs = np.expand_dims(img, axis=0)
 
 # Use this for prediction with model served with tensorflow serving
