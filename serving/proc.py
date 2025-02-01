@@ -16,6 +16,8 @@ from PIL import Image
 import earthquake_detection.data_preprocessing as DataPreprocessing
 import serving.conf as conf
 
+logger = logging.getLogger('earthquake-detection-api')
+
 
 # # Load extracted raw signals
 # raw_signals = np.load('../../../data/STEAD/extracted_raw_signals_subsample_1000.npy')
@@ -72,6 +74,8 @@ class GetPredictions():
         self.signal = request.signal
         self.sampling_rate = request.sampling_rate
         self.results = {}
+        self.status = 'OK'
+        self.message = ''
 
     def preproc(self, img_size):
         img = DataPreprocessing.plot_spectrogram(self.signal[:,2], self.sampling_rate)
@@ -115,10 +119,10 @@ class GetPredictions():
             prediction = response.json()['predictions'][0]
             return prediction
         except requests.exceptions.RequestException as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f'Error connecting to TensorFlow Serving: {e}'
-            )
+            self.status = False
+            self.message = f'Error connecting to TensorFlow Serving: {e}'
+            logger.warning(self.message)
+            return None
 
     def get_predictions(self):
         classification_img = self.preproc(img_size=(150,100))
@@ -128,8 +132,17 @@ class GetPredictions():
             self.get_magnitude_prediction(magnitude_img)
         else:
             self.magnitude_pred = None
-        predictions = {
-            'signal_class': self.class_pred,
-            'signal_class_probability': self.class_pred_prob,
-            'earthquake_magnitude': self.magnitude_pred
-        }
+        if self.status:
+            result = {
+                'signal_class': self.class_pred,
+                'signal_class_probability': self.class_pred_prob,
+                'earthquake_magnitude': self.magnitude_pred,
+            }
+        else:
+            result = {
+                'status': 'ERROR',
+                'message': self.message,
+                'signal_class': None,
+                'signal_class_probability': None,
+                'earthquake_magnitude': None
+            }
