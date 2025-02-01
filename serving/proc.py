@@ -73,10 +73,9 @@ class GetPredictions():
         self.sampling_rate = request.sampling_rate
         self.results = {}
 
-    def preproc(self):
-        raw_signal = self.signal[:,2]
-        img = DataPreprocessing.plot_spectrogram(raw_signal, self.sampling_rate)
-        img = Image.fromarray(img).resize((100,150))
+    def preproc(self, img_size):
+        img = DataPreprocessing.plot_spectrogram(self.signal[:,2], self.sampling_rate)
+        img = Image.fromarray(img).resize(img_size) # Resize to the size the chosen model accepts
         img_arr = np.array(img) / 255.0
         self.preproc_img = img_arr.tolist()
 
@@ -122,6 +121,15 @@ class GetPredictions():
             )
 
     def get_predictions(self):
-        preproc_img = self.preproc()
-        self.get_classification_prediction(preproc_img)
-
+        classification_img = self.preproc(img_size=(150,100))
+        self.get_classification_prediction(classification_img)
+        if self.class_pred == 'earthquake':
+            magnitude_img = self.preproc(img_size=(300,100))
+            self.get_magnitude_prediction(magnitude_img)
+        else:
+            self.magnitude_pred = None
+        predictions = {
+            'signal_class': self.class_pred,
+            'signal_class_probability': self.class_pred_prob,
+            'earthquake_magnitude': self.magnitude_pred
+        }
