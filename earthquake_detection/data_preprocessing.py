@@ -37,7 +37,7 @@ from PIL import Image
 from tqdm import tqdm
 
 
-def plot_spectrogram(trace, img_width=3, img_height=2, dpi=100):
+def plot_spectrogram(trace, sampling_rate=100, img_width=3, img_height=2, dpi=100):
     '''Plots a spectrogram image for the Z-axis of a seismic signal trace, given a
     numpy.ndarray with 3 columns, the X, Y, and Z axes.
 
@@ -50,7 +50,7 @@ def plot_spectrogram(trace, img_width=3, img_height=2, dpi=100):
     -------
     matplotlib.pyplot figure showing the spectrogram of the signal trace'''
     fig, ax = plt.subplots(figsize=(img_width,img_height), dpi=dpi)
-    ax.specgram(trace, Fs=100, NFFT=256, cmap='gray', vmin=-10, vmax=25)
+    ax.specgram(trace, Fs=sampling_rate, NFFT=256, cmap='gray', vmin=-10, vmax=25)
     ax.set_xlim([0,60])
     ax.axis('off')
     plt.gca().set_axis_off()

@@ -25,3 +25,10 @@ async def health_check():
     return {
         'model_version_status'
     }
+
+
+@app.post('/earthquake-detection/predict')
+@app.post('/predict')
+def predict(request: conf.PredictionRequest):
+    results = proc.GetPredictions(request).get_predictions()
+    return results
