@@ -5,10 +5,10 @@ from pydantic import BaseModel, Field
 
 logger = logging.getLogger('earthquake-detection-api')
 
-#CLASSIFICATION_ENDPOINT = 'http://localhost:8501/v1/models/model:predict'
 CLASSIFICATION_ENDPOINT = 'http://localhost:8501/v1/models/classification-model:predict'
 MAGNITUDE_ENDPOINT = 'http://localhost:8502/v1/models/magnitude-model:predict'
 HEADERS = {"Content-Type": "application/json"}
+
 
 class PredictionRequest(BaseModel):
     """Validation model for the incoming request payload."""

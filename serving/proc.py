@@ -19,67 +19,67 @@ import serving.conf as conf
 logger = logging.getLogger('earthquake-detection-api')
 
 
-# Load extracted raw signals
-raw_signals = np.load('../../../data/STEAD/extracted_raw_signals_subsample_1000.npy')
+# # Load extracted raw signals
+# raw_signals = np.load('../../../data/STEAD/extracted_raw_signals_subsample_1000.npy')
 
-# Load metadata
-metadata = pd.read_feather('../../../data/STEAD/extracted_metadata_subsample_1000.feather')
-metadata = metadata.reset_index()
+# # Load metadata
+# metadata = pd.read_feather('../../../data/STEAD/extracted_metadata_subsample_1000.feather')
+# metadata = metadata.reset_index()
 
-model_path = '/Users/kaelynnrose/Documents/DATA_SCIENCE/projects/Earthquake_Detection/models/cnn_classification_50epochs_1738169508.keras'
-model = tf.keras.models.load_model(model_path)
-model.export('../signal_classification_model/1')
+# model_path = '/Users/kaelynnrose/Documents/DATA_SCIENCE/projects/Earthquake_Detection/models/cnn_classification_50epochs_1738169508.keras'
+# model = tf.keras.models.load_model(model_path)
+# model.export('../signal_classification_model/1')
 
-model_path = '/Users/kaelynnrose/Documents/DATA_SCIENCE/projects/Earthquake_Detection/models/cnn_regression_magnitude_20epochs_1738185565.keras'
-model = tf.keras.models.load_model(model_path)
-model.export('../earthquake_magnitude_prediction_model/1')
+# model_path = '/Users/kaelynnrose/Documents/DATA_SCIENCE/projects/Earthquake_Detection/models/cnn_regression_magnitude_20epochs_1738185565.keras'
+# model = tf.keras.models.load_model(model_path)
+# model.export('../earthquake_magnitude_prediction_model/1')
 
-model_path = '/Users/kaelynnrose/Documents/DATA_SCIENCE/projects/Earthquake_Detection/models/earthquake_magnitude_prediction_model/1'
-model = tf.saved_model.load(model_path)
-
-
-docker run -p 8501:8501 --name=earthquake-detection-model \
-  --mount type=bind,source=/Users/kaelynnrose/Documents/DATA_SCIENCE/projects/Earthquake_Detection/models/model,destination=/models/model \
-  -e MODEL_NAME=model -t tensorflow/serving
-
-docker run -p 8501:8501 --name=classification-model \
-  --mount type=bind,source=/Users/kaelynnrose/Documents/DATA_SCIENCE/projects/Earthquake_Detection/models/signal_classification_model,destination=/models/classification-model \
-  -e MODEL_NAME=classification-model -t tensorflow/serving
-
-docker run -p 8502:8501 --name=magnitude-model \
-  --mount type=bind,source=/Users/kaelynnrose/Documents/DATA_SCIENCE/projects/Earthquake_Detection/models/earthquake_magnitude_prediction_model,destination=/models/magnitude-model \
-  -e MODEL_NAME=magnitude-model -t tensorflow/serving
+# model_path = '/Users/kaelynnrose/Documents/DATA_SCIENCE/projects/Earthquake_Detection/models/earthquake_magnitude_prediction_model/1'
+# model = tf.saved_model.load(model_path)
 
 
-signal = raw_signals[i][:,2]
-img = DataPreprocessing.plot_spectrogram(signal)
-img = Image.fromarray(img).resize((100,150))
-img = np.array(img) / 255.0
+# docker run -p 8501:8501 --name=earthquake-detection-model \
+#   --mount type=bind,source=/Users/kaelynnrose/Documents/DATA_SCIENCE/projects/Earthquake_Detection/models/model,destination=/models/model \
+#   -e MODEL_NAME=model -t tensorflow/serving
 
-# Use this for prediction straight from model artifact
-imgs = np.expand_dims(img, axis=0)
+# docker run -p 8501:8501 --name=classification-model \
+#   --mount type=bind,source=/Users/kaelynnrose/Documents/DATA_SCIENCE/projects/Earthquake_Detection/models/signal_classification_model,destination=/models/classification-model \
+#   -e MODEL_NAME=classification-model -t tensorflow/serving
 
-# Use this for prediction with model served with tensorflow serving
-img = img.tolist()
-
-
-data =  {
-    "signature_name": "serving_default",  # Change this if you use a custom signature
-    "instances": [{"input_layer_1": img}]
-}
-endpoint = MAGNITUDE_ENDPOINT
-headers = {"Content-Type": "application/json"}
-
-try:
-    response = requests.post(endpoint, json=data, headers=headers)
-    response.raise_for_status()  # Raise an exception if the response is an error
-    prediction = response.json()['predictions'][0]  # Extract the prediction from the response
-    return prediction
-except requests.exceptions.RequestException as e:
-    raise HTTPException(status_code=500, detail=f"Error connecting to TensorFlow Serving: {e}")
+# docker run -p 8502:8501 --name=magnitude-model \
+#   --mount type=bind,source=/Users/kaelynnrose/Documents/DATA_SCIENCE/projects/Earthquake_Detection/models/earthquake_magnitude_prediction_model,destination=/models/magnitude-model \
+#   -e MODEL_NAME=magnitude-model -t tensorflow/serving
 
 
-(np.array(prediction) > 0.5).astype(int)
+# signal = raw_signals[i][:,2]
+# img = DataPreprocessing.plot_spectrogram(signal)
+# img = Image.fromarray(img).resize((100,150))
+# img = np.array(img) / 255.0
+
+# # Use this for prediction straight from model artifact
+# imgs = np.expand_dims(img, axis=0)
+
+# # Use this for prediction with model served with tensorflow serving
+# img = img.tolist()
+
+
+# data =  {
+#     "signature_name": "serving_default",  # Change this if you use a custom signature
+#     "instances": [{"input_layer_1": img}]
+# }
+# endpoint = MAGNITUDE_ENDPOINT
+# headers = {"Content-Type": "application/json"}
+
+# try:
+#     response = requests.post(endpoint, json=data, headers=headers)
+#     response.raise_for_status()  # Raise an exception if the response is an error
+#     prediction = response.json()['predictions'][0]  # Extract the prediction from the response
+#     return prediction
+# except requests.exceptions.RequestException as e:
+#     raise HTTPException(status_code=500, detail=f"Error connecting to TensorFlow Serving: {e}")
+
+
+# (np.array(prediction) > 0.5).astype(int)
 
 
 
@@ -93,7 +93,7 @@ class GetPredictions():
 
     def preproc(self, img_size):
         img = DataPreprocessing.plot_spectrogram(self.signal, self.sampling_rate)
-        img = Image.fromarray(img).resize(img_size) # Resize to the size the chosen model accepts
+        img = Image.fromarray(img).resize(img_size) # Resize to match the input size for the model
         img_arr = np.array(img) / 255.0
         self.preproc_img = img_arr.tolist()
 
@@ -116,13 +116,12 @@ class GetPredictions():
             "signature_name": "serving_default",
             "instances": [{"input_layer_1": magnitude_img}]
         }
-        self.magnitude_pred = self.get_prediction_from_tf_serving(
+        magnitude_pred = self.get_prediction_from_tf_serving(
             endpoint=conf.MAGNITUDE_ENDPOINT,
             data=data,
             headers=conf.HEADERS
         )
-        #TODO add postproc
-        pass
+        self.magnitude_pred = magnitude_pred[0]
 
     def get_prediction_from_tf_serving(self, endpoint, headers, data):
         try:
