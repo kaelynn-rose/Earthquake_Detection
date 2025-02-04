@@ -7,6 +7,7 @@ import sys
 sys.path.append('../')
 sys.path.append('../../../')
 
+import httpx
 import numpy as np
 import pandas as pd
 
@@ -105,7 +106,7 @@ class EarthquakeDetection():
             "instances": [{"input_layer": self.classification_img}]
         }
         self.class_pred_prob = self.get_prediction_from_tf_serving(
-            endpoint=conf.CLASSIFICATION_ENDPOINT,
+            endpoint=conf.TF_SEVRVING_ENDPOINTS['classification']['predict'],
             data=data,
             headers=conf.HEADERS
         )
@@ -118,7 +119,7 @@ class EarthquakeDetection():
             "instances": [{"input_layer_1": self.magnitude_img}]
         }
         magnitude_pred = self.get_prediction_from_tf_serving(
-            endpoint=conf.MAGNITUDE_ENDPOINT,
+            endpoint=conf.TF_SEVRVING_ENDPOINTS['magnitude']['predict'],
             data=data,
             headers=conf.HEADERS
         )

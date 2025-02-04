@@ -2,6 +2,8 @@ import logging
 import sys
 sys.path.append('../')
 
+import httpx
+
 from fastapi import FastAPI, HTTPException
 
 from serving import conf, proc
@@ -17,7 +19,7 @@ app = FastAPI(
         'This API provides an interface to ML models for prediction of seismic signal '
         'class (earthquake or noise) and earthquake magntiude prediction.'
     ),
-    version=VERSION
+    version = VERSION
 )
 
 @app.get('/earthquake-detection/', response_model=conf.HealthCheck)
@@ -26,14 +28,17 @@ app = FastAPI(
 async def health_check():
     """Surfaces the result of the backend tensorflow serving model status check.
     This tensorflow model is the artifact that provides predictions."""
-    return {
-        'model_version_status': [
-            'version': VERSION,
-            'state': 'AVAILABLE',
-            'status': 'OK',
-            'error_message': ''
-        ]
-    }
+    model_status_dict = {}
+    overall_status = 'HEALTHY'
+    async with httpx.AsyncClient() as client:
+        for model_name in conf.TF_SERVING_ENDPOINTS:
+            try:
+                response = await client.get(conf.TF_SERVING_ENDPOINTS[model_name]['health'])
+                model_status = response.json()
+                model_status_dict[model_name] = model_status
+            except Exception as e:
+                overall_status = 'UNHEALTHY'
+    return conf.HealthCheck(status=overall_status, details=model_status_dict)
 
 
 @app.post('/earthquake-detection/predict')
