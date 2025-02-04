@@ -29,12 +29,15 @@ from io import BytesIO
 from pathlib import Path
 
 import h5py
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 from PIL import Image
 from tqdm import tqdm
+
+matplotlib.use('Agg') # sets Matplotlib to generate images without the need for a graphical interface; avoids GUI related errors with FastAPI
 
 
 def plot_spectrogram(trace, sampling_rate=100, img_width=3, img_height=2, dpi=100):

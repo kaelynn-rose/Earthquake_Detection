@@ -107,11 +107,11 @@ class EarthquakeDetection():
             "instances": [{"input_layer": self.classification_img}]
         }
         self.class_pred_prob = self.get_prediction_from_tf_serving(
-            endpoint=conf.TF_SEVRVING_ENDPOINTS['classification']['predict'],
+            endpoint=conf.TF_SERVING_ENDPOINTS['classification']['predict'],
             data=data,
             headers=conf.HEADERS
-        )
-        self.class_pred = 'earthquake' if self.class_pred_prob[0] > 0.5 else 'noise'
+        )[0]
+        self.class_pred = 'earthquake' if self.class_pred_prob > 0.5 else 'noise'
 
     def get_magnitude_prediction(self):
         self.magnitude_img = self.preproc(img_size=(100,150))
@@ -120,7 +120,7 @@ class EarthquakeDetection():
             "instances": [{"input_layer_1": self.magnitude_img}]
         }
         magnitude_pred = self.get_prediction_from_tf_serving(
-            endpoint=conf.TF_SEVRVING_ENDPOINTS['magnitude']['predict'],
+            endpoint=conf.TF_SERVING_ENDPOINTS['magnitude']['predict'],
             data=data,
             headers=conf.HEADERS
         )
@@ -154,13 +154,15 @@ class EarthquakeDetection():
                 'signal_class_prediction': self.class_pred,
                 'signal_class_probability': self.class_pred_prob,
                 'earthquake_magnitude_prediction': self.magnitude_pred,
+                'status': 'OK',
+                'message': '',
             }
         else:
             self.results = {
-                'status': 'ERROR',
-                'message': self.message,
                 'signal_class_prediction': None,
                 'signal_class_probability': None,
-                'earthquake_magnitude_prediction': None
+                'earthquake_magnitude_prediction': None,
+                'status': 'ERROR',
+                'message': self.message
             }
         return self.results
