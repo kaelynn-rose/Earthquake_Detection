@@ -1,17 +1,17 @@
 import logging
 import sys
+
 sys.path.append('../')
 
 import httpx
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 
 from serving import conf, proc
 
 logger = logging.getLogger('earthquake-detection-api')
 
 VERSION = '0.0.1'
-
 
 app = FastAPI(
     title = 'Earthquake Detection API',
@@ -41,8 +41,23 @@ async def health_check():
     return conf.HealthCheck(status=overall_status, details=model_status_dict)
 
 
-@app.post('/earthquake-detection/predict')
-@app.post('/predict')
+@app.post('/earthquake-detection/predict', response_model=conf.PredictionResponse)
+@app.post('/predict', response_model=conf.PredictionResponse, include_in_schema=False)
 def predict(request: conf.PredictionRequest):
+    """Main prediction endpoint for the classification and earthquake magnitude
+    ML models. Takes an input seismic signal of length 6000 samples (60 seconds of
+    signal at 100 Hz sampling rate) and predicts 1) whether the signal is an
+    earthquake or noise, and 2) if the signal is predicted to be an earthquake,
+    predicts the earthquake magnitude.
+
+    Parameters
+    ----------
+    request : conf.PredictionRequest
+        A PredictionRequest object
+
+    Returns
+    -------
+    A conf.PredictionResponse object which contains predictions for signal class
+    and earthquake magnitude if applicable"""
     results = proc.EarthquakeDetection(request).get_predictions()
     return results

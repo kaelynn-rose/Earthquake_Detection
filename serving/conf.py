@@ -2,7 +2,7 @@ from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field
 
-# Tensorflow Serving constants
+
 TF_SERVING_ENDPOINTS = {
     'classification': {
         'health': 'http://localhost:8501/v1/models/classification-model',
@@ -38,15 +38,6 @@ class PredictionRequest(BaseModel):
         description='Sampling rate of the signal, used for preprocessing before prediction'
     )
 
-    class Config:
-        schema_extra = {
-            'example': {
-                'signal': (
-
-                )
-            }
-        }
-
 class PredictionResponse(BaseModel):
     """Pydantic model for the response payload containing the model's predictions."""
     class_prediction: Union[str, None] = Field(
@@ -54,16 +45,3 @@ class PredictionResponse(BaseModel):
     )
     status: str = Field(description='Prediction result status.')
     message: Union[str, None] = Field(description='Error message, if an error occurred.')
-
-
-
-
-
-# model_status_dict = {}
-# async with httpx.AsyncClient() as client:
-#     for model_name in TF_SERVING_ENDPOINTS:
-#         response = await client.get(TF_SERVING_ENDPOINTS[model_name]['health'])
-#         response.raise_for_status() # Raises HTTPError if status code is not 200
-#         model_status = response.json()
-#         model_status_dict[model_name] = model_status
-# print(model_status_dict)

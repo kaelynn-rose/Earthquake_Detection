@@ -7,7 +7,6 @@ import sys
 sys.path.append('../')
 sys.path.append('../../../')
 
-import httpx
 import numpy as np
 import pandas as pd
 
@@ -81,14 +80,16 @@ logger = logging.getLogger('earthquake-detection-api')
 
 # (np.array(prediction) > 0.5).astype(int)
 
+# request = {
+#     'signal': img,
+#     'sampling_rate': 100
+# }
 
 
 class EarthquakeDetection():
     def __init__(self, request):
         self.signal = request.signal
-        #self.signal = request['signal']
         self.sampling_rate = request.sampling_rate
-        #self.sampling_rate = request['sampling_rate']
         self.results = {}
         self.status = 'OK'
         self.message = ''
