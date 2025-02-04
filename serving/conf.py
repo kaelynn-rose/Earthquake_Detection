@@ -1,8 +1,11 @@
+"""This configuration file defines models for API payload and resposne validation,
+as well as constants used by the API."""
+
 from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field
 
-
+# Constants
 TF_SERVING_ENDPOINTS = {
     'classification': {
         'health': 'http://localhost:8501/v1/models/classification-model',
@@ -16,7 +19,9 @@ TF_SERVING_ENDPOINTS = {
 HEADERS = {"Content-Type": "application/json"}
 
 
+# Validation models
 class HealthCheck(BaseModel):
+    """Checks the health of the ML models served by TF Serving"""
     status: str = Field(description='Overall status of all models')
     details: dict = Field(description='Model availability status details')
 
@@ -60,7 +65,7 @@ class PredictionResponse(BaseModel):
             'signal classification model.'
         )
     )
-    earthquake_magnitude_prediction: float = Field(
+    earthquake_magnitude_prediction: Union[float, None] = Field(
         description=(
             'The magnitude of the earthquake predicted by the magnitude model, if the '
             'signal is predicted to be an earthquake by the classification model.'

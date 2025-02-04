@@ -1,3 +1,10 @@
+"""This API uses two machine learning models to predict 1) whether a seismic signal
+payload is an earthquake or noise, and 2) the magnitude of the signal if the signal
+is predicted to be an earthquake. This module implements signal preprocessing,
+interfaces with the ML models served using Tensorflow Serving, applies postprocessing
+steps, and returns prediction results. It provides an interface with the Uvicorn
+server gateway for running the API."""
+
 import logging
 import sys
 
@@ -13,6 +20,7 @@ logger = logging.getLogger('earthquake-detection-api')
 
 VERSION = '0.0.1'
 
+
 app = FastAPI(
     title = 'Earthquake Detection API',
     description = (
@@ -21,6 +29,7 @@ app = FastAPI(
     ),
     version = VERSION
 )
+
 
 @app.get('/earthquake-detection/', response_model=conf.HealthCheck)
 @app.get('/earthquake-detection', response_model=conf.HealthCheck, include_in_schema=False)
@@ -59,5 +68,7 @@ def predict(request: conf.PredictionRequest):
     -------
     A conf.PredictionResponse object which contains predictions for signal class
     and earthquake magnitude if applicable"""
+    logger.debug('hello world')
     results = proc.EarthquakeDetection(request).get_predictions()
+    logger.info(f'Returning results {results}')
     return results
