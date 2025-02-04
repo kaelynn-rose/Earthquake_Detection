@@ -1,6 +1,6 @@
 
 
-
+import logging
 import requests
 import sys
 
@@ -10,7 +10,6 @@ sys.path.append('../../../')
 import numpy as np
 import pandas as pd
 
-from FastAPI import HTTPException
 from PIL import Image
 
 import earthquake_detection.data_preprocessing as DataPreprocessing
@@ -83,10 +82,12 @@ logger = logging.getLogger('earthquake-detection-api')
 
 
 
-class GetPredictions():
-    def __init__(request):
-        self.signal = request.signal
-        self.sampling_rate = request.sampling_rate
+class EarthquakeDetection():
+    def __init__(self, request):
+        #self.signal = request.signal
+        self.signal = request['signal']
+        #self.sampling_rate = request.sampling_rate
+        self.sampling_rate = request['sampling_rate']
         self.results = {}
         self.status = 'OK'
         self.message = ''
@@ -95,13 +96,13 @@ class GetPredictions():
         img = DataPreprocessing.plot_spectrogram(self.signal, self.sampling_rate)
         img = Image.fromarray(img).resize(img_size) # Resize to match the input size for the model
         img_arr = np.array(img) / 255.0
-        self.preproc_img = img_arr.tolist()
+        return img_arr.tolist()
 
     def get_classification_prediction(self):
-        classification_img = self.preproc(img_size=(100,150))
+        self.classification_img = self.preproc(img_size=(100,150))
         data =  {
             "signature_name": "serving_default",
-            "instances": [{"input_layer": classification_img}]
+            "instances": [{"input_layer": self.classification_img}]
         }
         self.class_pred_prob = self.get_prediction_from_tf_serving(
             endpoint=conf.CLASSIFICATION_ENDPOINT,
@@ -111,10 +112,10 @@ class GetPredictions():
         self.class_pred = 'earthquake' if self.class_pred_prob[0] > 0.5 else 'noise'
 
     def get_magnitude_prediction(self):
-        magnitude_img = self.preproc(img_size=(100,150))
+        self.magnitude_img = self.preproc(img_size=(100,150))
         data =  {
             "signature_name": "serving_default",
-            "instances": [{"input_layer_1": magnitude_img}]
+            "instances": [{"input_layer_1": self.magnitude_img}]
         }
         magnitude_pred = self.get_prediction_from_tf_serving(
             endpoint=conf.MAGNITUDE_ENDPOINT,
@@ -126,10 +127,11 @@ class GetPredictions():
     def get_prediction_from_tf_serving(self, endpoint, headers, data):
         try:
             response = requests.post(
-                endpoint=endpoint,
+                endpoint,
                 json=data,
                 headers=headers
             )
+            print(response.text)
             response.raise_for_status()  # Raise an exception if the response is an error
             prediction = response.json()['predictions'][0]
             return prediction
@@ -146,17 +148,17 @@ class GetPredictions():
         else:
             self.magnitude_pred = None
         if self.status:
-            result = {
-                'signal_class': self.class_pred,
+            self.results = {
+                'signal_class_prediction': self.class_pred,
                 'signal_class_probability': self.class_pred_prob,
-                'earthquake_magnitude': self.magnitude_pred,
+                'earthquake_magnitude_prediction': self.magnitude_pred,
             }
         else:
-            result = {
+            self.results = {
                 'status': 'ERROR',
                 'message': self.message,
-                'signal_class': None,
+                'signal_class_prediction': None,
                 'signal_class_probability': None,
-                'earthquake_magnitude': None
+                'earthquake_magnitude_prediction': None
             }
-        return result
+        return self.results

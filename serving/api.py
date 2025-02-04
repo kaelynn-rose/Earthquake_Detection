@@ -30,5 +30,5 @@ async def health_check():
 @app.post('/earthquake-detection/predict')
 @app.post('/predict')
 def predict(request: conf.PredictionRequest):
-    results = proc.GetPredictions(request).get_predictions()
+    results = proc.EarthquakeDetection(request).get_predictions()
     return results
