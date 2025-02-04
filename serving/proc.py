@@ -84,10 +84,10 @@ logger = logging.getLogger('earthquake-detection-api')
 
 class EarthquakeDetection():
     def __init__(self, request):
-        #self.signal = request.signal
-        self.signal = request['signal']
-        #self.sampling_rate = request.sampling_rate
-        self.sampling_rate = request['sampling_rate']
+        self.signal = request.signal
+        #self.signal = request['signal']
+        self.sampling_rate = request.sampling_rate
+        #self.sampling_rate = request['sampling_rate']
         self.results = {}
         self.status = 'OK'
         self.message = ''
