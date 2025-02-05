@@ -13,7 +13,10 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import RobustScaler
 
-def prepare_datasets(imgs, labels, preproc_func=None, preproc_func_kwargs=None, use_scaler=False, batch_size=32):
+def prepare_datasets(
+    imgs, labels, preproc_func=None, preproc_func_kwargs=None,
+    use_scaler=False, batch_size=32
+):
     # If array has only one dimension, it must be reshaped for input into the scaler
     if labels.ndim == 1:
         labels = labels.reshape(-1, 1)
