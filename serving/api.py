@@ -30,7 +30,6 @@ app = FastAPI(
     version = VERSION
 )
 
-
 @app.get('/earthquake-detection/', response_model=conf.HealthCheck)
 @app.get('/earthquake-detection', response_model=conf.HealthCheck, include_in_schema=False)
 @app.get('/', response_model=conf.HealthCheck, include_in_schema=False)
@@ -48,7 +47,6 @@ async def health_check():
             except Exception as e:
                 overall_status = 'UNHEALTHY'
     return conf.HealthCheck(status=overall_status, details=model_status_dict)
-
 
 @app.post('/earthquake-detection/predict', response_model=conf.PredictionResponse)
 @app.post('/predict', response_model=conf.PredictionResponse, include_in_schema=False)
