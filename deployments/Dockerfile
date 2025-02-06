@@ -30,21 +30,21 @@ ENV MAMBA_ENV="earthquake-detection-serving"
 RUN conda install -c conda-forge mamba -y
 
 # Copy the environment.yaml file into the container
-COPY env.yaml env.yaml
+COPY env.yaml /tmp/env.yaml
 
 # Create the Conda environment from the environment.yaml file
-RUN mamba env create -f env.yaml && conda clean -a
-RUN mamba activate ${MAMBA_ENV}
+#RUN mamba env create -f /tmp/env.yaml && conda clean -a
+RUN /bin/bash -c "mamba env create -f /tmp/env.yaml && mamba clean -a && echo 'source activate ${MAMBA_ENV}' >> ~/.bashrc"
 
 # Set working directory
-WORKDIR /app
+WORKDIR /home/app
 
 # Copy the entrypoint script
 COPY entrypoint.sh entrypoint.sh
 
 # Download the saved ML models from S3
-RUN aws s3 cp s3://earthquake-detection/models/signal_classification_model/ models/model_1 --recursive
-RUN aws s3 cp s3://earthquake-detection/models/earthquake_magnitude_prediction_model/ models/model_2 --recursive
+RUN aws s3 cp s3://earthquake-detection/models/signal_classification_model/ /models/model_1 --recursive
+RUN aws s3 cp s3://earthquake-detection/models/earthquake_magnitude_prediction_model/ /models/model_2 --recursive
 
 # Expose the necessary ports for the API and ML models
 EXPOSE 5000 8501 8502
