@@ -9,7 +9,6 @@ sys.path.append('../')
 sys.path.append('../../../')
 
 import numpy as np
-import pandas as pd
 
 from PIL import Image
 
