@@ -44,6 +44,7 @@ async def health_check():
                 response = await client.get(conf.TF_SERVING_ENDPOINTS[model_name]['health'])
                 model_status = response.json()
                 model_status_dict[model_name] = model_status
+                response.raise_for_status()
             except Exception as e:
                 overall_status = 'UNHEALTHY'
     return conf.HealthCheck(status=overall_status, details=model_status_dict)
