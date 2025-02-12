@@ -47,3 +47,6 @@ ipython_config.py
 *.keras
 *.h5
 
+# Ignore numpy files
+*.npy
+
