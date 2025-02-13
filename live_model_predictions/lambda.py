@@ -98,3 +98,4 @@ def lambda_handler(event, context):
         print(f'Error getting results from earthquake-detection API: {requests.text}')
 
     plot_results(trace, class_pred, earthquake_magnitude, bucket_name, key)
+    return response.json()
