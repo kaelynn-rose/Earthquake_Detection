@@ -1,3 +1,4 @@
+"""Architectures for ML model training"""
 
 import sys
 import time
