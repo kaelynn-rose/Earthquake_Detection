@@ -12,8 +12,11 @@ import numpy as np
 
 from io import BytesIO
 
+plt.ioff() # Turn off matplotlib interactive mode to ensure plots are clearing from memory. Prevents  memory leakage.
+
 s3_client = boto3.client('s3')
 s3_resource = boto3.resource('s3')
+
 
 def get_trace_from_s3(key, bucket_name):
     """Fetch seismic trace from S3 bucket
@@ -95,7 +98,7 @@ def lambda_handler(event, context):
         earthquake_magnitude = response.json()['earthquake_magnitude_prediction']
         print(f'Predictions for trace {key}: class: {class_pred}, class probability: {pred_prob}, earthquake magnitude: {earthquake_magnitude}')
     else:
-        print(f'Error getting results from earthquake-detection API: {requests.text}')
+        print(f'Error getting results from earthquake-detection API: {response.text}')
 
     plot_results(trace, class_pred, earthquake_magnitude, bucket_name, key)
     return response.json()
