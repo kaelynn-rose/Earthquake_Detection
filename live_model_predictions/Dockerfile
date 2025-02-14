@@ -9,7 +9,7 @@ COPY lambda_function.py ./
 COPY requirements.txt ./
 
 # Install the dependencies
-RUN pip install -r requirements.txt --target /home/app
+RUN python3 -m pip install -r requirements.txt
 
 # Set the CMD to the Lambda handler function
 CMD ["/home/app/lambda_function.lambda_handler"]
