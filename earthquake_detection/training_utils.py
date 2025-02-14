@@ -1,3 +1,5 @@
+"""Utilities for ML model training and evaluation."""
+
 import sys
 
 sys.path.append('../')
