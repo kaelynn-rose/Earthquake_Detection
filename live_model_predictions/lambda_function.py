@@ -51,6 +51,7 @@ def plot_results(trace, class_pred, earthquake_magnitude, bucket_name, key):
         The S3 bucket to fetch the trace from
     key : str
         The S3 filepath of the trace to fetch"""
+    print('Plotting results figure')
     fig, ax = plt.subplots(figsize=(6,4))
     ax.specgram(trace, Fs=100, NFFT=256, cmap='gray', vmin=-10, vmax=20); # plot spectrogram
     ax.set_xlim([0,60])
@@ -64,11 +65,15 @@ def plot_results(trace, class_pred, earthquake_magnitude, bucket_name, key):
         plt.suptitle(f'Prediction: {class_pred}, Magnitude: N/A', fontweight='bold', fontsize=14)
     ax.set_title(key, fontsize=8, wrap=True)
     plt.tight_layout()
-    plt.show()
     fig_filename = f'{key}_{class_pred}.png'
+    local_savepath = f'/tmp/{fig_filename}'
+    print(f'Saving results figure locally to filepath: {local_savepath}')
+    plt.savefig(local_savepath, bbox_inches='tight')
     s3_filepath = f'live_data_prediction_images/{fig_filename}'
-    plt.savefig(fig_filename, bbox_inches='tight')
-    s3_resource.meta.client.upload_file(fig_filename, bucket_name, s3_filepath) # upload spectrogram and predictions to s3 bucket
+    print(f'Uploading results figure to S3 to filepath: {s3_filepath}')
+    s3_resource.meta.client.upload_file(local_savepath, bucket_name, s3_filepath) # upload spectrogram and predictions to s3 bucket
+    plt.close()
+
 
 def lambda_handler(event, context):
     """Lambda function that processes an event, triggered when an item is
@@ -82,6 +87,8 @@ def lambda_handler(event, context):
         The context object containing runtime information"""
     bucket_name = event['Records'][0]['s3']['bucket']['name'] # get bucket name
     key = event['Records'][0]['s3']['object']['key'] # get event key
+    key = key.replace('%3A',':')
+    trace_name = key.split('/')[1].replace('.npy','')
 
     trace = get_trace_from_s3(key, bucket_name)
     request = {'signal': trace.tolist(), 'sampling_rate':100}
@@ -96,9 +103,9 @@ def lambda_handler(event, context):
         class_pred = response.json()['signal_class_prediction']
         pred_prob = response.json()['signal_class_probability']
         earthquake_magnitude = response.json()['earthquake_magnitude_prediction']
-        print(f'Predictions for trace {key}: class: {class_pred}, class probability: {pred_prob}, earthquake magnitude: {earthquake_magnitude}')
+        print(f'Predictions for trace {trace_name}: class: {class_pred}, class probability: {pred_prob}, earthquake magnitude: {earthquake_magnitude}')
+        plot_results(trace, class_pred, earthquake_magnitude, bucket_name, trace_name)
     else:
         print(f'Error getting results from earthquake-detection API: {response.text}')
 
-    plot_results(trace, class_pred, earthquake_magnitude, bucket_name, key)
     return response.json()
