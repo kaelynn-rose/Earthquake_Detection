@@ -1,9 +1,9 @@
 """
 This script fetches live data from a specified seismic network/station/channel
 using an ObsPy client to connect to the SeedLink server. The data handling function
-saves the seismic trace data in ~65 second intervals with a ~7 second sliding window.
-So the first saved data packet will be approximately 0-65s, the second will be 7-72s,
-the third will be 14-79s, etc. The script saves each data packet to a /live_data
+saves the seismic trace data in 60 second intervals with a 10 second sliding window.
+So the first saved data packet will be 0-60s, the second will be 10-70s,
+the third will be 20-80s, etc. The script saves each data packet to a /live_data
 directory within the specified S3 bucket. This script uses plac annotations to pass the
 desired parameters into the function; see Example Usage for how to run this script
 from the command line.
@@ -16,7 +16,6 @@ Example Usage
 # /live_data directory in the S3 bucket named 'earthquake-detection'
 
 >> python3 fetch_live_data.py -network 'HV' -station 'AHUD' -channel 'EHZ' -bucket 'earthquake-detection'
-
 """
 
 import boto3
@@ -26,7 +25,7 @@ import plac
 from obspy.clients.seedlink.easyseedlink import create_client
 
 
-def handle_data(trace):
+def handle_data2(trace):
     """A function that handles new data received from the SeedLink server, and
     saves a snapshot of the live data  array to an S3 bucket in .npy format.
 
@@ -66,6 +65,49 @@ def handle_data(trace):
         np.save('tmp.npy', data_packet)
         s3.meta.client.upload_file('tmp.npy', bucket, file_path) # upload array file to S3
 
+def handle_data(trace):
+    """A function that handles new data received from the SeedLink server, and
+    saves a snapshot of the live data  array to an S3 bucket in .npy format.
+
+    Parameters
+    ----------
+    trace : obspy.core.trace
+        An ObsPy trace object that contains live stream data and metadata"""
+    # Access global variables that are needed for data handling
+    global bucket
+    global traces
+    if traces == []:
+        traces = trace
+    else:
+        traces += trace
+
+    # Add trace to trace stream
+    print(f'Received the following trace:\n {trace}')
+    print(f'The trace stream now contains {traces.stats.npts} points')
+
+    if traces.stats.npts >= 6000:
+        starttime = traces.stats.starttime
+        snapshot = traces.slice(starttime=starttime, endtime=starttime+60.0) # get 60s snapshot of the signal
+        traces = traces.trim(starttime=starttime+10.0) # trim the first 6s from the signal to slide the window forward
+        print(f'Taking signal snapshot: {snapshot}')
+
+        # Get trace metadata for file naming
+        network = snapshot.stats['network']
+        station = snapshot.stats['station']
+        channel = snapshot.stats['channel']
+        sampling_rate = snapshot.stats['sampling_rate']
+        starttime = snapshot.stats['starttime']
+        endtime = snapshot.stats['endtime']
+
+        # Save snapshot data packet to .npy and upload to S3
+        print('Saving signal snapshot to S3')
+        s3 = boto3.resource('s3')
+        file_path = (
+            f'live_data/{network}_{station}_{channel}_{sampling_rate}Hz_{starttime}_{endtime}.npy'
+        )
+        np.save('tmp.npy', snapshot)
+        s3.meta.client.upload_file('tmp.npy', bucket, file_path) # upload array file to S3
+    print('\n')
 
 @plac.annotations(
     network=('Seismic network name', 'option', 'network', str),
