@@ -1,9 +1,9 @@
 """
 This script fetches live data from a specified seismic network/station/channel
 using an ObsPy client to connect to the SeedLink server. The data handling function
-saves the seismic trace data in ~60 second intervals with a ~10 second sliding window.
-So the first saved data packet will be approximately 0-60s, the second will be 10-70s,
-the third will be 20-80s, etc. The script saves each data packet to a /live_data
+saves the seismic trace data in ~65 second intervals with a ~7 second sliding window.
+So the first saved data packet will be approximately 0-65s, the second will be 7-72s,
+the third will be 14-79s, etc. The script saves each data packet to a /live_data
 directory within the specified S3 bucket. This script uses plac annotations to pass the
 desired parameters into the function; see Example Usage for how to run this script
 from the command line.
@@ -44,11 +44,11 @@ def handle_data(trace):
 
     # If more than 9 traces in traces variable, combine and save the array to S3
     if len(traces) > 9:
-        data_packet = traces[0:9] # data to save (~60 seconds)
-        traces = traces[2:] # remove the first 2 traces from the variable to slide the window of time by ~10s forward
-        data_packet = traces[0]
+        data_packet = traces[0:9] # data to save (7.21s * 9 = ~65 seconds)
+        data_packet = traces[0] # initialize a data packet containing the first trace
         for trace in traces[1:]:
             data_packet += trace # merge signal traces into one signal to plot
+        traces = traces[1:] # remove the first trace from the variable to slide the window of time by 7.21 seconds forward
 
         # Get trace metadata for file naming
         network = data_packet.stats['network']
