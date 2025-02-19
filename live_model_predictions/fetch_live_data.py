@@ -25,46 +25,6 @@ import plac
 from obspy.clients.seedlink.easyseedlink import create_client
 
 
-def handle_data2(trace):
-    """A function that handles new data received from the SeedLink server, and
-    saves a snapshot of the live data  array to an S3 bucket in .npy format.
-
-    Parameters
-    ----------
-    trace : obspy.core.trace
-        An ObsPy trace object that contains live stream data and metadata"""
-    # Access global variables that are needed for data handling
-    global bucket
-    global traces
-
-    # Add trace to trace stream
-    traces.append(trace)
-    print(f'Received the following trace:\n {trace}\n')
-
-    # If more than 9 traces in traces variable, combine and save the array to S3
-    if len(traces) > 9:
-        data_packet = traces[0:9] # data to save (7.21s * 9 = ~65 seconds)
-        data_packet = traces[0] # initialize a data packet containing the first trace
-        for trace in traces[1:]:
-            data_packet += trace # merge signal traces into one signal to plot
-        traces = traces[1:] # remove the first trace from the variable to slide the window of time by 7.21 seconds forward
-
-        # Get trace metadata for file naming
-        network = data_packet.stats['network']
-        station = data_packet.stats['station']
-        channel = data_packet.stats['channel']
-        sampling_rate = data_packet.stats['sampling_rate']
-        starttime = data_packet.stats['starttime']
-        endtime = data_packet.stats['endtime']
-
-        # Save snapshot data packet to .npy and upload to S3
-        s3 = boto3.resource('s3')
-        file_path = (
-            f'live_data/{network}_{station}_{channel}_{sampling_rate}Hz_{starttime}_{endtime}.npy'
-        )
-        np.save('tmp.npy', data_packet)
-        s3.meta.client.upload_file('tmp.npy', bucket, file_path) # upload array file to S3
-
 def handle_data(trace):
     """A function that handles new data received from the SeedLink server, and
     saves a snapshot of the live data  array to an S3 bucket in .npy format.
