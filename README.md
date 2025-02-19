@@ -41,24 +41,30 @@ Each seismic sample has 3 data channels of seismic data in .h5py format along wi
 ## 4. Exploratory Data Analysis
 Exploratory data analysis was performed on the 100,000 signals to inform modeling. An example of a single seismic waveform and spectrogram is shown below, along with a graph of its power spectral density (PSD):
 
-![plot](./plots/waveform_spectrogram_plot.png)
+![plot](./Figures/wave_spec_psd.png)
 
-Earthquakes in the dataset ranged from -0.30 to 6.5 magnitude with an average magnitude of 1.53. Additionally they ranged from -3.21k m to 294.35 km source depth with an average of 15.71 km depth, and ranged from a source-reciever distance of 0 km to 333.61 km from the receiving seismic station, with an average distance of 50.90 km.
+Earthquakes in the dataset ranged from -0.36 to 7.9 magnitude with an average magnitude of 1.52, ranged from -3.46 km to 341.74 km source depth with an average of 15.42 km depth, and 0 km to 336.38 km from the receiving seismic station, with an average distance of 50.58 km.
 
-![plot](./Figures/mags_depths_dists.png)
+![plot](./plots/mags_depths_distances.png)
 
 The global distribution of earthquakes in this dataset is shown here:
-![plot](./Figures/eq_map.png)
+![plot](./plots/earthquake_map.png)
 
 The global distribution of seismic stations which detected the earthquakes in the dataset is shown here:
-![plot](./Figures/station_map.png)
+![plot](./plots/station_map.png)
 
 The distributions of p-wave and s-wave arrival times (in samples, where 1 second is 100 samples) is shown on the plot below. P-wave and s-wave arrival times are important because they help seismologists determine the location of the earthquake. The p-wave arrival times have a high frequency of being selected at time intervals of 100, whereas the s-wave arrival times do not display this pattern as strongly. This may affect the p-wave prediction MSE of the models later on, as the "true" data is picked at intervals of 100 samples / 1 second and the predicted times may be more granular.
 
-![plot](./Figures/pwaves_s_waves_EDA.png)
+![plot](./plots/arrival_times.png)
 
-## 5. Image Creation
+## 5. Image Creation for CNN model training
+To create images for convolutional neural network training, I plotted both the waveform and spectrogram for the vertical component of each seismogram and saved these as separate 3x2 inch images and 3x1 inch images, respectively. I normalized the color axis of the spectrograms to the range of -10 to 25 decibels per Hz for consistency across all signals. The spectrograms were created using an NFFT of 256. These signals were plotted using the utilities located in the `earthquake_detection/data_preprocessing.py` file contained in this repo.
 
+Here are examples of earthquake and noise waveforms and spectrograms:
+![plot](./plots/example_earthquakes_1.png)
+![plot](./plots/example_earthquakes_2.png)
+![plot](./plots/example_noise_1.png)
+![plot](./plots/example_noise_2.png)
 
 ## 6. Earthquake Detection & Characterization using Convolutional Neural Networks (CNNs)
 ## 6a. Classification CNN - 'Earthquake' or 'Noise' Prediction
@@ -140,17 +146,17 @@ Exploratory data analysis was performed on the 100,000 signals to inform modelin
 
 Earthquakes in the dataset ranged from -0.36 to 7.9 magnitude with an average magnitude of 1.52, ranged from -3.46 km to 341.74 km source depth with an average of 15.42 km depth, and 0 km to 336.38 km from the receiving seismic station, with an average distance of 50.58 km.
 
-![plot](./Figures/mags_depths_dists.png)
+![plot](./plots/mags_depths_distances.png)
 
 The global distribution of earthquakes in this dataset is shown here:
-![plot](./Figures/eq_map.png)
+![plot](./plots/earthquake_map.png)
 
 The global distribution of seismic stations which detected the earthquakes in the dataset is shown here:
-![plot](./Figures/station_map.png)
+![plot](./plots/station_map.png)
 
 The distributions of p-wave and s-wave arrival times (in samples, where 1 second is 100 samples) is shown on the plot below. P-wave and s-wave arrival times are important because they help seismologists determine the location of the earthquake. The p-wave arrival times have a high frequency of being selected at time intervals of 100, whereas the s-wave arrival times do not display this pattern as strongly. This may affect the p-wave prediction MSE of the models later on, as the "true" data is picked at intervals of 100 samples / 1 second and the predicted times may be more granular.
 
-![plot](./Figures/pwaves_s_waves_EDA.png)
+![plot](./plots/arrival_times.png)
 
 
 ### Image Creation
