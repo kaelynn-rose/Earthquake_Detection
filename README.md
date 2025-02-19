@@ -41,17 +41,18 @@ Each seismic sample has 3 data channels of seismic data in .h5py format along wi
 ## 4. Exploratory Data Analysis
 Exploratory data analysis was performed on the 100,000 signals to inform modeling. An example of a single seismic waveform and spectrogram is shown below, along with a graph of its power spectral density (PSD):
 
-![plot](./Figures/wave_spec_psd.png)
+<img src="./Figures/wave_spec_psd.png" width="1000"/>
 
 Earthquakes in the dataset ranged from -0.36 to 7.9 magnitude with an average magnitude of 1.52, ranged from -3.46 km to 341.74 km source depth with an average of 15.42 km depth, and 0 km to 336.38 km from the receiving seismic station, with an average distance of 50.58 km.
 
-![plot](./plots/mags_depths_distances.png)
+<img src="./plots/mags_depths_distances.png" width="700"/>
 
 The global distribution of earthquakes in this dataset is shown here:
-![plot](./plots/earthquake_map.png)
+<img src="./plots/earthquake_map.png" width="700"/>
 
 The global distribution of seismic stations which detected the earthquakes in the dataset is shown here:
-![plot](./plots/station_map.png)
+<img src="./plots/station_map.png" width="700"/>
+
 
 The distributions of p-wave and s-wave arrival times (in samples, where 1 second is 100 samples) is shown on the plot below. P-wave and s-wave arrival times are important because they help seismologists determine the location of the earthquake. The p-wave arrival times have a high frequency of being selected at time intervals of 100, whereas the s-wave arrival times do not display this pattern as strongly. This may affect the p-wave prediction MSE of the models later on, as the "true" data is picked at intervals of 100 samples / 1 second and the predicted times may be more granular.
 
