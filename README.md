@@ -39,7 +39,23 @@ Earthquakes and their p-wave and s-wave arrival times in the STEAD dataset were 
 Each seismic sample has 3 data channels of seismic data in .h5py format along with the metadata. The three channels correspond to the north-south, east-west, and vertical components of the seismogram (the amount of ground displacement measured on each of these axes by the instrument). Each sample is 60 seconds long and sampled at 100 Hz, for a total of 6000 samples per signal. Since the class balance of the full STEAD data is 235,426 noise samples to 1,030,232 earthquake signals (about 18% noise and 82% earthquakes), I randomly sampled 400,000 earthquake signals from the full earthquake dataset and used all 235,426 noise samples to create a closer class balance of 37% noise to 63% earthquakes for a total dataset of 635426 samples (about half the original dataset). Of these samples, 100,000 were randomly selected to train each model.
 
 ## 4. Exploratory Data Analysis
+Exploratory data analysis was performed on the 100,000 signals to inform modeling. An example of a single seismic waveform and spectrogram is shown below, along with a graph of its power spectral density (PSD):
 
+![plot](./plots/waveform_spectrogram_plot.png)
+
+Earthquakes in the dataset ranged from -0.30 to 6.5 magnitude with an average magnitude of 1.53. Additionally they ranged from -3.21k m to 294.35 km source depth with an average of 15.71 km depth, and ranged from a source-reciever distance of 0 km to 333.61 km from the receiving seismic station, with an average distance of 50.90 km.
+
+![plot](./Figures/mags_depths_dists.png)
+
+The global distribution of earthquakes in this dataset is shown here:
+![plot](./Figures/eq_map.png)
+
+The global distribution of seismic stations which detected the earthquakes in the dataset is shown here:
+![plot](./Figures/station_map.png)
+
+The distributions of p-wave and s-wave arrival times (in samples, where 1 second is 100 samples) is shown on the plot below. P-wave and s-wave arrival times are important because they help seismologists determine the location of the earthquake. The p-wave arrival times have a high frequency of being selected at time intervals of 100, whereas the s-wave arrival times do not display this pattern as strongly. This may affect the p-wave prediction MSE of the models later on, as the "true" data is picked at intervals of 100 samples / 1 second and the predicted times may be more granular.
+
+![plot](./Figures/pwaves_s_waves_EDA.png)
 
 ## 5. Image Creation
 
