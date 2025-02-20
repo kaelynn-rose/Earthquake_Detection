@@ -58,8 +58,8 @@ The distributions of p-wave and s-wave arrival times (in samples, where 1 second
 
 ![plot](./plots/arrival_times.png)
 
-## 5. Image Creation for CNN model training
-To create images for convolutional neural network training, I plotted both the waveform and spectrogram for the vertical component of each seismogram and saved these as separate 3x2 inch images and 3x1 inch images, respectively. I normalized the color axis of the spectrograms to the range of -10 to 25 decibels per Hz for consistency across all signals. The spectrograms were created using an NFFT of 256. These signals were plotted using the utilities located in the `earthquake_detection/data_preprocessing.py` file contained in this repo.
+## 5. Data Pre-processing and Image Creation for CNN model training
+To create images for convolutional neural network training, I plotted both the waveform and spectrogram for the vertical component of each seismogram and saved these as separate 3x2 inch images and 3x1 inch images, respectively. I normalized the color axis of the spectrograms to the range of -10 to 25 decibels per Hz for consistency across all signals. The spectrograms were created using an NFFT of 256. This pre-processing and image creation was executed using the `notebooks/data_preprocessing.ipynb` notebook in this repo, using the utilities located in the `earthquake_detection/data_preprocessing.py` module. The pre-processed images were saved in array format to S3.
 
 Here are examples of earthquake and noise waveforms and spectrograms:
 ![plot](./plots/example_earthquakes_1.png)
@@ -68,25 +68,124 @@ Here are examples of earthquake and noise waveforms and spectrograms:
 ![plot](./plots/example_noise_2.png)
 
 ## 6. Earthquake Detection & Characterization using Convolutional Neural Networks (CNNs)
-## 6a. Classification CNN - 'Earthquake' or 'Noise' Prediction
-## 6b. Regression CNN - Earthquake Magnitude Prediction
-## 6c. Regression CNN - P-Wave and S-Wave Arrival Time Prediction
+The `model_training_cnn.ipynb` notebook in this repo contains the training results and evaluation for the CNN models used to predict signal class, earthquake magnitude, P-wave arrival time, and S-wave arrival time. Training utilities, such as for the train/val/test split, model evaluation, and plotting results can be found in the `earthquake_detection/training_utils.py` module.
+
+The model architectures can be found in the `earthquake_detection/architectures.py` module in this repo, and were the result of several rounds of architecture and hyperparameter experimentation.
+
+### 6a. Classification CNN - 'Earthquake' or 'Noise' Prediction
+The classification CNN model was trained to predict earthquake class (_earthquake_ or _noise_) using the 100,000 spectrogram images created during the data pre-processing step. A single convolutional layer was chosen for the model architecture because it resulted in excellent predictive power, as well as faster training and inference speed than multiple convolutional layers.
+
+<img src="./plots/cnn_classification_summary.png" width="600"/>
+
+#### Results
+Evaluating the best CNN model on the test set (10k samples) produced the following results:
+```
+Accuracy: 99.01%
+Precision: 99.27%
+Recall: 98.83%
+F1 Score: 99.05%
+```
+
+Confusion matrix, bar chart, and ROC curve for the test set:
+<img src="./plots/cnn_classification_results.png" width="1000"/>
+
+The model loss and model accuracy of the training and validation set during model training:
+<img src="./plots/cnn_classification_training.png" width="700"/>
+
+### 6b. Regression CNN - Earthquake Magnitude Prediction
+A regression CNN model was trained to predict earthquake magnitude using the ~50,000 earthquake spectrogram images created during the data pre-processing step. A single convolutional layer was chosen for the model architecture because it resulted in good predictive power, as well as faster training and inference speed than multiple convolutional layers.
+
+<img src="./plots/cnn_magnitude_summary.png" width="600"/>
+
+#### Results
+Evaluating the best CNN model on the test set (10k samples) produced the following results:
+```
+Baseline MSE (MSE if only the average magnitude was predicted each time): 0.95
+Model MSE: 0.17
+
+Baseline MAE (MAE if only the average magnitude was predicted each time): 0.77
+Model MSE: 0.29
+```
+
+Plots of model results for the test set:
+<img src="./plots/cnn_magnitude_results.png" width="1000"/>
+
+As shown on the plots above, the model's MSE and MAE for earthquake magnitude are significantly lower than the baseline. The plot of predicted vs. observed magnitude shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers.
+
+The model loss and mean absolute error of the training and validation set during model training are shown below:
+<img src="./plots/cnn_magnitude_training.png" width="700"/>
+
+
+### 6c. Regression CNN - P-Wave and S-Wave Arrival Time Prediction
+A regression CNN model was trained to predict earthquake P-wave and S-wave arrival times, using the ~50,000 earthquake waveform images created during the data pre-processing step. A single convolutional layer was chosen for the model architecture because it resulted in good predictive power, as well as faster training and inference speed than multiple convolutional layers.
+
+<img src="./plots/cnn_pwave_summary.png" width="600"/>
+
+#### Results: P-wave arrival time
+Evaluating the best CNN model on the test set (10k samples) produced the following results:
+```
+Baseline MSE (MSE if only the average P-wave arrival was predicted each time): 30683.12
+Model MSE: 5390.10
+
+Baseline MAE (MAE if only the average P-wave arrival was predicted each time): 152.34
+Model MSE: 51.21
+```
+
+Plots of model results for the test set:
+<img src="./plots/cnn_pwave_results.png" width="1000"/>
+
+As shown on the plots above, the model's MSE and MAE for earthquake P-wave arrival time are significantly lower than the baseline. The plot of predicted vs. observed P-wave arrival time shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers. In the STEAD training set, P-wave arrival times were mostly limited to 100 sample (1 second) labels, so this model retains this limitation in preciseness to its predictions.
+
+The model loss and mean absolute error of the training and validation set during model training are shown below:
+<img src="./plots/cnn_pwave_training.png" width="700"/>
+
+#### Results: S-wave arrival time
+Evaluating the best CNN model on the test set (10k samples) produced the following results:
+```
+Baseline MSE (MSE if only the average S-wave arrival was predicted each time): 373828.92
+Model MSE: 46720.34
+
+Baseline MAE (MAE if only the average S-wave arrival was predicted each time): 450.76
+Model MSE: 133.30
+```
+
+Plots of model results for the test set:
+<img src="./plots/cnn_swave_results.png" width="1000"/>
+
+As shown on the plots above, the model's MSE and MAE for earthquake S-wave arrival time are significantly lower than the baseline. The plot of predicted vs. observed S-wave arrival time shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers, especially at larger observed values of S-wave arrival time.
+
+The model loss and mean absolute error of the training and validation set during model training are shown below:
+<img src="./plots/cnn_swave_training.png" width="700"/>
 
 
 ## 7. Earthquake Detection & Characterization using Long-Short Term Memory (LSTM) networks
-## 7a. Classification LSTM - 'Earthquake' or 'Noise' Prediction
-## 7b. Regression LSTM - Earthquake Magnitude, P-Wave, and S-Wave Prediction
+To try to remove the need to create and store signal images in order to train a model, I created two types of LSTM models, which are a type of recursive neural network (RNN) model designed specifically to mitigate the exploding gradient problem common with RNNs.
+
+Preliminary testing showed that the full 6000 sample signals of the STEAD dataset were too long and too noisy for the LSTM to predict well. So, the following pre-processing technique was used to convert the signals to format better suited for LSTM model training:
+
+1. Using the same 100,000 signal dataset as for the CNN models above, applied a 1-50 Hz Butterworth bandpass filter to each signal to reduce environmental noise
+2. Applied a Hilbert transform to get the positive signal envelope (a smooth curve outlining the positive extremes of the signal)
+3. Calculated the 2-second rolling mean of the envelope
+4. De-meaned the rolling avermean by subtracting the overall mean
+5. Resampled the envelope to 300 samples from the original 6000 samples
+
+Here is an example of a signal (gray) with its calculated envelope (dark red) and P-wave and s-wave arrival times shown. Note how the P-wave and S-wave arrivals correspond with a sharp increase in slope of the envelope:
+
+![plot](./plots/lstm_seismic_signal_envelope.png)
+
+### 7a. Classification LSTM - 'Earthquake' or 'Noise' Prediction
+### 7b. Regression LSTM - Earthquake Magnitude, P-Wave, and S-Wave Prediction
 
 ## 8. Model comparison
 
 
 ## 9. Deployment
-## 9a. API / Docker / ECR / ECS
+### 9a. API / Docker / ECR / ECS
 
 
 ## 10. Model Predictions on Live Data
-## 10a. Docker / Lambda with S3 trigger
-## 10b. Live predictions earthquake detection gif
+### 10a. Docker / Lambda with S3 trigger
+### 10b. Live predictions earthquake detection gif
 
 ## 11. Limitations
 
