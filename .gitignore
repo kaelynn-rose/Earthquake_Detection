@@ -50,3 +50,6 @@ ipython_config.py
 # Ignore numpy files
 *.npy
 
+# Ignore model prediction images
+**/live_data_prediction_images
+
