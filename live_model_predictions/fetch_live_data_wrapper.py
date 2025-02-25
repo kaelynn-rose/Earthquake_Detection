@@ -4,7 +4,7 @@ the event of a timeout from the Obspy EasySeedLink client."""
 import subprocess
 import time
 
-MAX_RETRIES = 5  # Maximum number of retries
+MAX_RETRIES = 10  # Maximum number of retries
 
 def run_script():
     retries = 0
