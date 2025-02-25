@@ -87,7 +87,7 @@ F1 Score: 99.05%
 ```
 
 Confusion matrix, bar chart, and ROC curve for the test set:
-<img src="./plots/cnn_classification_results.png" width="1000"/>
+<img src="./plots/cnn_classification_results.png" width="900"/>
 
 The model loss and model accuracy of the training and validation set during model training:
 <img src="./plots/cnn_classification_training.png" width="700"/>
@@ -191,7 +191,7 @@ Confusion matrix, bar chart, and ROC curve for the test set:
 <img src="./plots/lstm_classification_results.png" width="1000"/>
 
 The model loss and model accuracy of the training and validation set during model training:
-<img src="./plots/lstm_classification_training.png" width="700"/>
+<img src="./plots/lstm_classification_training.png" width="900"/>
 
 ### 7b. Regression LSTM - Earthquake Magnitude, P-Wave, and S-Wave Prediction
 A regression LSTM model was trained to predict earthquake magnitude, P-wave arrival time, and S-wave arrival time, using the ~50,000 earthquake signal envelope vectors created during the data pre-processing step.
