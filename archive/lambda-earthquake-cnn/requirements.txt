@@ -1,0 +1,2 @@
+# List all python libraries for the lambda
+tensorflow==2.4.1
