@@ -265,15 +265,50 @@ Since for this project I was most interested in signal class and earthquake magn
 
 ## 9. Deployment
 I completed the following steps to deploy the CNN models for real-time prediction:
-1. Designed and built an API using Python's FastAPI, with Pydantic for payload/response validation and Uvicorn for serving. The API accepts a 6000-sample signal vector and optional sampling frequency as a payload, and returns the predicted singal class (_earthquake_ or _noise_) and the earthquake magnitude if the signal is predicted to be an earthquake. The API applies pre-processing steps to transform the input from a signal vector to a spectrogram image of the correct size, and applies post-processing steps to the response. This API See `deployments/serving` in this repo for API code.
+
+1. Designed and built an API using Python's FastAPI, with Pydantic for payload/response validation and Uvicorn for serving. The API accepts a 6000-sample (60 second) signal vector and optional sampling frequency as a payload, and returns the predicted singal class (_earthquake_ or _noise_) and the earthquake magnitude if the signal is predicted to be an earthquake. The API applies pre-processing steps to transform the input from a signal vector to a spectrogram image of the correct size, and applies post-processing steps to the response. This API See `deployments/serving` in this repo for API code.
 <img src="./plots/api_successful.png" width="1000"/>
+
 2. Packaged the API into a Docker container. See `deployments/Dockerfile` for code.
+
 3. Pushed the Docker image to AWS ECR, a managed Docker container registry for storing Docker images.
+
 4. Created an AWS ECS cluster and task definition, configured an application load balancer, and started the ECS task to serve the API.
 
 ## 10. Model Predictions on Live Data
-### 10a. Docker / Lambda with S3 trigger
-### 10b. Live predictions earthquake detection gif
+To demonstrate the effectiveness of the model predictions in real-time, I created a `live_model_predictions/fetch_live_data.py` script to fetch seismic data from the Incorporated Research Institutions for Seismology (IRIS) SeedLink client using the Obspy package for Python. Here is how the script gets live data from the selected station:
+
+```
+# specify client (IRIS) to retrieve data from
+client = create_client('rtserve.iris.washington.edu', on_data=handle_data)
+
+# specify stream
+client.select_stream('HV', 'AHUD', 'EHZ') # network, station, channel
+
+# run the client, this will begin streaming the data
+client.run()
+
+```
+
+I selected the Hawaiian Volcano Observatory ("HV") network because it has stations located on Kilauea, an actively erupting shield volcano. Due to Kilauea's eruption and active magma plumbing system, earthquakes occur very frequently compared to a regular tectonic fault system, making this an excellent location for detecting local earthquakes in real-time. I selected the "AHUD" station and "EHZ" channel, which is an extremely short-period, high-gain seismometer with a vertical orientation (like the train/test data used to fit and evaluate the model).
+
+The USGS Hawaiian Volcano Observatory map shows seismometers (black triangles) and recent earthquakes (circles) at Kilauea volcano:
+
+<img src="./plots/kilauea_map.png" width="1000"/>
+
+The map below shows the location of the AHUD station, located southeast of Kilauea's summit caldera, along the east rift zone.
+<img src="./plots/station_AHUD.png" width="1000"/>
+
+The `live_model_predictions/fetch_live_data.py` script reads in the live stream of seismic data, taking snapshots of the data in 6000-sample (60 second) intervals, with a sliding window of 60 samples (6 seconds). The data snapshots are automatically uploaded to an AWS S3 bucket.
+
+### 10b. Live data prediction deployment with Docker and AWS Lambda
+To generate model predictions on the live stream of seismic data in real time, I used the following steps:
+1. Created a Lambda function script in `live_model_predictions/lambda_function.py` with an S3 trigger that automatically triggers the Lambda function to run whenever a seismic signal file is uploaded to the S3 bucket. The Lambda function fetches the seismic signal file, formats the earthquake detection API payload, requests a response from the API, prints the API response, and saves a plot of the requested signal and response to an S3 path.
+2. Dockerized the Lambda function and pushed it to AWS ECR
+3. Ran the `live_model_predictions/fetch_live_data.py` script to start real-time predictions.
+
+### 10b. Live predictions
+
 
 ## 11. Limitations
 
