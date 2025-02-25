@@ -2,6 +2,34 @@
 
 [![DOI](https://zenodo.org/badge/360650102.svg)](https://zenodo.org/badge/latestdoi/360650102)
 
+## Table of Contents
+[1. Summary](#1.summary)
+
+[2. Background and Motivation](#2.background-and-motivation)
+
+[3. Data](#3.data)
+
+[4. Exploratory Data Analysis](#4.exploratory-data-analysis)
+
+[5. Data Pre-processing and Image Creation for CNN model training](#5.data-pre-processing-and-image-creation-for-cnn-model-training)
+
+[6. Earthquake Detection & Characterization using Convolutional Neural Networks (CNNs)](#6.earthquake-detection-&-characterization-using-convolutional-neural-networks-(cnns))
+
+[7. Earthquake Detection & Characterization using Long-Short Term Memory (LSTM) networks](#7.earthquake-detection-&-characterization-using-long-short-term-memory-(lstm)-networks)
+
+[8. Model comparison](#8.model-comparison)
+
+[9. Deployment of earthquake detection API (FastAPI, Pydantic, Docker, ECR, ECS)](#9.deployment)
+
+[10. Model Predictions on Live Data (Docker, ECR, Lambda)](#10.model-predictions-on-live-data)
+
+[11. Live Predictions for seismic station at Kilauea volcano, Hawaii](#11.live-predictions)
+
+[12. Limitations and Future Work](#12.limitations-and-future-work)
+
+[13. Conclusions](#13.conclusions)
+
+
 ## 1. Summary
 The goal of this project was to train and and deploy a deep learning model to classify seismic signals into two categories - _earthquake_ or _noise_, and to predict earthquake characteristics such as earthquake magnitude, P-wave arrival time, and S-wave arrival time. Two ML models were trained and evaluated:
 1) A convolutional neural network (CNN) model, trained on spectrogram images of the seismic signals
@@ -11,7 +39,7 @@ The CNN model was determined to be the best performing model overall, as it demo
 
 To serve model predictions, I built an API (Python FastAPI, Pydantic) which takes in a 60 second seismic signal and predicts the signal class (earthquake or noise) and earthquake magntiude. I packaged the API into a Docker container and deployed it using AWS ECR and ECS.
 
-To demonstrate the model's predictions, I created a script to fetch live seismic data from Hawaii Volcano Observatory (HVO), which monitors the actively erupting Kilauea volcano, and save snapshots of the seismic data to an S3 bucket. I built an AWS Lambda function with an S3 trigger to automatically submit the data snapshots to the model prediction API when new data is saved to the S3 bucket. During the demo, the API serving model predictions successfully predicted several local volcanic earthquakes. Examples of live data prediction are detailed below in Section 10.
+To demonstrate the model's predictions, I created a script to fetch live seismic data from Hawaii Volcano Observatory (HVO), which monitors the actively erupting Kilauea volcano, and save snapshots of the seismic data to an S3 bucket. I built an AWS Lambda function with an S3 trigger to automatically submit the data snapshots to the model prediction API when new data is saved to the S3 bucket. During the demo, the API serving model predictions successfully predicted several local volcanic earthquakes. Examples of live data prediction are detailed below in [Section 10](#10.-model-predictions-on-live-data).
 
 ## 2. Background and Motivation
 In the past, earthquake monitoring at agencies and institutions has generally relied on signal processing algorithms such as STA/LTA (Short-Term Average/Long-Term Average) and/or template matching/cross-correlation to detect earthquakes. However, these methods have limited effectiveness for small, low-magnitude earthquakes, and can be affected by noisy environments. Machine learning algorithms are gradually being adopted to improve earthquake detection, and this project demonstrates how deep learning methods can be used effectively to detect and characterize earthquakes.
@@ -41,16 +69,19 @@ Each seismic sample has 3 data channels of seismic data in .h5py format along wi
 ## 4. Exploratory Data Analysis
 Exploratory data analysis was performed on the 100,000 signals to inform modeling. An example of a single seismic waveform and spectrogram is shown below, along with a graph of its power spectral density (PSD):
 
-<img src="./Figures/wave_spec_psd.png" width="1000"/>
+<img src="./plots/waveform_spectrogram_plot.png" width="700"/>
 
 Earthquakes in the dataset ranged from -0.36 to 7.9 magnitude with an average magnitude of 1.52, ranged from -3.46 km to 341.74 km source depth with an average of 15.42 km depth, and 0 km to 336.38 km from the receiving seismic station, with an average distance of 50.58 km.
 
 <img src="./plots/mags_depths_distances.png" width="700"/>
 
 The global distribution of earthquakes in this dataset is shown here:
+
 <img src="./plots/earthquake_map.png" width="700"/>
 
+
 The global distribution of seismic stations which detected the earthquakes in the dataset is shown here:
+
 <img src="./plots/station_map.png" width="700"/>
 
 
@@ -62,6 +93,7 @@ The distributions of p-wave and s-wave arrival times (in samples, where 1 second
 To create images for convolutional neural network training, I plotted both the waveform and spectrogram for the vertical component of each seismogram and saved these as separate 3x2 inch images and 3x1 inch images, respectively. I normalized the color axis of the spectrograms to the range of -10 to 25 decibels per Hz for consistency across all signals. The spectrograms were created using an NFFT of 256. This pre-processing and image creation was executed using the `notebooks/data_preprocessing.ipynb` notebook in this repo, using the utilities located in the `earthquake_detection/data_preprocessing.py` module. The pre-processed images were saved in array format to S3.
 
 Here are examples of earthquake and noise waveforms and spectrograms:
+
 ![plot](./plots/example_earthquakes_1.png)
 ![plot](./plots/example_earthquakes_2.png)
 ![plot](./plots/example_noise_1.png)
@@ -292,11 +324,12 @@ client.run()
 
 I selected the Hawaiian Volcano Observatory ("HV") network because it has stations located on Kilauea, an actively erupting shield volcano. Due to Kilauea's eruption and active magma plumbing system, earthquakes occur very frequently compared to a regular tectonic fault system, making this an excellent location for detecting local earthquakes in real-time. I selected the "AHUD" station and "EHZ" channel, which is an extremely short-period, high-gain seismometer with a vertical orientation (like the train/test data used to fit and evaluate the model).
 
-The USGS Hawaiian Volcano Observatory map shows seismometers (black triangles) and recent earthquakes (circles) at Kilauea volcano:
+The USGS Hawaiian Volcano Observatory map shows seismometers (black triangles) and recent earthquakes (circles) at Kilauea volcano. This map and earthquake report list is available at https://www.usgs.gov/volcanoes/kilauea?date=2week&inst=101740:
 
 <img src="./plots/kilauea_map.png" width="1000"/>
 
-The map below shows the location of the AHUD station, located southeast of Kilauea's summit caldera, along the east rift zone.
+The map below shows the location of the AHUD station, located southeast of Kilauea's summit caldera, along the east rift zone:
+
 <img src="./plots/station_AHUD.png" width="1000"/>
 
 The `live_model_predictions/fetch_live_data.py` script reads in the live stream of seismic data, taking snapshots of the data in 6000-sample (60 second) intervals, with a sliding window of 60 samples (6 seconds). The data snapshots are automatically uploaded to an AWS S3 bucket.
@@ -330,7 +363,7 @@ The live model prediction gave the signal an 0.8671 probability of being an eart
 
 ## 11. Limitations and Future Work
 
-One limitation that is visible in the live prediction snapshots above is that the model was trained on a training set of data with an average P-wave arrival time of ~7 seconds from the start of the signal trace, meaning that it is best at predicting signal class when the snapshot shows the earthquake near the start of the 60 second window. When an earthquake appears at the end of the 60 second window, the model often does not recognize it as an earthquake until it approaches the beginning of the snapshot window. In future work, we would like to add data augmentations to the training set to randomly offset the signal start time, making this model more generalizable to earthquakes appearing in different segments of the snapshot window.
+A limitation that is visible in the live prediction snapshots above is that the model was trained on a training set of data with an average P-wave arrival time of ~7 seconds from the start of the signal trace, meaning that it is best at predicting signal class when the snapshot shows the earthquake near the start of the 60 second window. When an earthquake appears at the end of the 60 second window, the model often does not recognize it as an earthquake until it approaches the beginning of the snapshot window. In future work, we would like to add data augmentations to the training set to randomly offset the signal start time, making this model more generalizable to earthquakes appearing in different segments of the snapshot window.
 
 ## 12. Conclusions
 
