@@ -87,7 +87,7 @@ F1 Score: 99.05%
 ```
 
 Confusion matrix, bar chart, and ROC curve for the test set:
-<img src="./plots/cnn_classification_results.png" width="900"/>
+<img src="./plots/cnn_classification_results2.png" width="900"/>
 
 The model loss and model accuracy of the training and validation set during model training:
 <img src="./plots/cnn_classification_training.png" width="700"/>
