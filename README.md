@@ -100,11 +100,11 @@ A regression CNN model was trained to predict earthquake magnitude using the ~50
 #### Results
 Evaluating the best CNN model on the test set (10k samples) produced the following results:
 ```
-Baseline MSE (MSE if only the average magnitude was predicted each time): 0.95
+Baseline MSE (MSE if only the average magnitude of the training set was predicted each time): 0.95
 Model MSE: 0.17
 
-Baseline MAE (MAE if only the average magnitude was predicted each time): 0.77
-Model MSE: 0.29
+Baseline MAE (MAE if only the average magnitude of the training set was predicted each time): 0.77
+Model MAE: 0.29
 ```
 
 Plots of model results for the test set:
@@ -128,7 +128,7 @@ Baseline MSE (MSE if only the average P-wave arrival was predicted each time): 3
 Model MSE: 5390.10
 
 Baseline MAE (MAE if only the average P-wave arrival was predicted each time): 152.34
-Model MSE: 51.21
+Model MAE: 51.21
 ```
 
 Plots of model results for the test set:
@@ -174,14 +174,102 @@ Here is an example of a signal (gray) with its calculated envelope (dark red) an
 ![plot](./plots/lstm_seismic_signal_envelope.png)
 
 ### 7a. Classification LSTM - 'Earthquake' or 'Noise' Prediction
+The classification LSTM model was trained to predict earthquake class (_earthquake_ or _noise_) using the 100,000  signal envelope vectors created during the data pre-processing step.
+
+<img src="./plots/lstm_classification_summary.png" width="600"/>
+
+#### Results
+Evaluating the best classification LSTM model on the test set (10k samples) produced the following results:
+```
+Accuracy: 97.06%
+Precision: 97.19%
+Recall: 97.15%
+F1 Score: 97.17%
+```
+
+Confusion matrix, bar chart, and ROC curve for the test set:
+<img src="./plots/lstm_classification_results.png" width="1000"/>
+
+The model loss and model accuracy of the training and validation set during model training:
+<img src="./plots/lstm_classification_training.png" width="700"/>
+
 ### 7b. Regression LSTM - Earthquake Magnitude, P-Wave, and S-Wave Prediction
+A regression LSTM model was trained to predict earthquake magnitude, P-wave arrival time, and S-wave arrival time, using the ~50,000 earthquake signal envelope vectors created during the data pre-processing step.
+
+<img src="./plots/lstm_magnitude_summary.png" width="700"/>
+
+#### Results: Earthquake magntiude prediction
+Evaluating the best LSTM model on the test set (10k samples) produced the following results:
+```
+Baseline MSE (MSE if only the average earthquake magnitude of the training set was predicted each time): 0.95
+Model MSE: 0.47
+
+Baseline MAE (MAE if only the average average earthquake magnitude of the training set was predicted each time): 0.77
+Model MSE: 0.51
+```
+
+Plots of model results for the test set:
+<img src="./plots/lstm_magnitude_results.png" width="1000"/>
+
+As shown on the plots above, the model's MSE and MAE for earthquake magnitude are significantly lower than the baseline. The plot of predicted vs. observed magnitude shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers.
+
+The model loss and mean absolute error of the training and validation set during model training are shown below:
+<img src="./plots/lstm_magnitude_training.png" width="700"/>
+
+#### Results: P-wave arrival time
+Evaluating the best LSTM model on the test set (10k samples) produced the following results:
+```
+Baseline MSE (MSE if only the average P-wave arrival of the training set was predicted each time): 30589.82
+Model MSE: 3612.93
+
+Baseline MAE (MAE if only the average P-wave arrival was predicted each time): 152.00
+Model MSE: 35.93
+```
+
+Plots of model results for the test set:
+<img src="./plots/lstm_pwave_results.png" width="1000"/>
+
+As shown on the plots above, the model's MSE and MAE for earthquake P-wave arrival time are significantly lower than the baseline. The plot of predicted vs. observed P-wave arrival time shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers. In the STEAD training set, P-wave arrival times were mostly limited to 100 sample (1 second) labels, so this model retains this limitation in preciseness to its predictions.
+
+The model loss and mean absolute error of the training and validation set during model training are shown below:
+<img src="./plots/lstm_pwave_training.png" width="700"/>
+
+#### Results: S-wave arrival time
+Evaluating the best LSTM model on the test set (10k samples) produced the following results:
+```
+Baseline MSE (MSE if only the average S-wave arrival of the training set was predicted each time): 372616.23
+Model MSE: 44034.20
+
+Baseline MAE (MAE if only the average S-wave arrival of the training set was predicted each time): 450.01
+Model MSE: 107.57
+```
+
+Plots of model results for the test set:
+<img src="./plots/lstm_swave_results.png" width="1000"/>
+
+As shown on the plots above, the model's MSE and MAE for earthquake S-wave arrival time are significantly lower than the baseline. The plot of predicted vs. observed S-wave arrival time shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers, especially at larger observed values of S-wave arrival time.
+
+The model loss and mean absolute error of the training and validation set during model training are shown below:
+<img src="./plots/lstm_swave_training.png" width="700"/>
 
 ## 8. Model comparison
+#### Classification model comparison:
+<img src="./plots/classifier_comparison.png" width="585"/>
 
+#### Regression model comparison:
+<img src="./plots/regression_comparison.png" width="1000"/>
+
+Overall, the CNN models performed best on predicting signal class and earthquake magntiude, while the LSTM models performed best at predicting P-wave and S-wave arrival times. Both types of models outperformed the baseline metrics, which are the metrics produced by simply predicting the most common signal class in the training set (for the classification problem) or the average value of the training set (for the regression problem).
+
+Since for this project I was most interested in signal class and earthquake magnitude, the CNN models were the ones deployed for use in real-time prediction.
 
 ## 9. Deployment
-### 9a. API / Docker / ECR / ECS
-
+I completed the following steps to deploy the CNN models for real-time prediction:
+1. Designed and built an API using Python's FastAPI, with Pydantic for payload/response validation and Uvicorn for serving. The API accepts a 6000-sample signal vector and optional sampling frequency as a payload, and returns the predicted singal class (_earthquake_ or _noise_) and the earthquake magnitude if the signal is predicted to be an earthquake. The API applies pre-processing steps to transform the input from a signal vector to a spectrogram image of the correct size, and applies post-processing steps to the response. This API See `deployments/serving` in this repo for API code.
+<img src="./plots/api_successful.png" width="1000"/>
+2. Packaged the API into a Docker container. See `deployments/Dockerfile` for code.
+3. Pushed the Docker image to AWS ECR, a managed Docker container registry for storing Docker images.
+4. Created an AWS ECS cluster and task definition, configured an application load balancer, and started the ECS task to serve the API.
 
 ## 10. Model Predictions on Live Data
 ### 10a. Docker / Lambda with S3 trigger
