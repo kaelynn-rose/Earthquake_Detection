@@ -108,7 +108,7 @@ Model MAE: 0.29
 ```
 
 Plots of model results for the test set:
-<img src="./plots/cnn_magnitude_results.png" width="1000"/>
+<img src="./plots/cnn_magnitude_results2.png" width="1000"/>
 
 As shown on the plots above, the model's MSE and MAE for earthquake magnitude are significantly lower than the baseline. The plot of predicted vs. observed magnitude shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers.
 
@@ -188,7 +188,7 @@ F1 Score: 97.17%
 ```
 
 Confusion matrix, bar chart, and ROC curve for the test set:
-<img src="./plots/lstm_classification_results.png" width="1000"/>
+<img src="./plots/lstm_classification_results2.png" width="1000"/>
 
 The model loss and model accuracy of the training and validation set during model training:
 <img src="./plots/lstm_classification_training.png" width="900"/>
