@@ -308,11 +308,33 @@ To generate model predictions on the live stream of seismic data in real time, I
 3. Ran the `live_model_predictions/fetch_live_data.py` script to start real-time predictions.
 
 ### 10b. Live predictions
+Here is an example of a live prediction on the seismic station data stream using the Lambda function and earthquake detection API in this repo. This earthquake was a 1.71 magnitude local volcanic earthquake that occurred at 2025-02-18 23:24:15 UTC at Kilauea.
+
+```
+Predictions for trace HV_AHUD_EHZ_100.0Hz_2025-02-18T23:24:06.940000Z_2025-02-18T23:25:06.940000Z:
+
+    class: earthquake,
+    class probability: 0.867120922,
+    earthquake magnitude: 1.11603117
+```
+
+Below is a slideshow video showing the sequence of signal snapshots in spectrogram image format and predictions surrounding the earthquake. The mostly black spectrogram images with lighter areas of at low frequencies are noise, and the appearance of a light-colored pulse at higher frequencies indicates an earthquake:
+
+<img src="./plots/live_data_animation1.gif" width="500"/>
+
+Here is the corresponding earthquake report from the USGS HVO:
+
+<img src="./plots/usgs_hvo_earthquake_report_1.png" width="400"/>
+
+The live model prediction gave the signal an 0.8671 probability of being an earthquake, and estimated a magnitude of 1.116, which is near the true magnitude of 1.71.
+
+## 11. Limitations and Future Work
+
+One limitation that is visible in the live prediction snapshots above is that the model was trained on a training set of data with an average P-wave arrival time of ~7 seconds from the start of the signal trace, meaning that it is best at predicting signal class when the snapshot shows the earthquake near the start of the 60 second window. When an earthquake appears at the end of the 60 second window, the model often does not recognize it as an earthquake until it approaches the beginning of the snapshot window. In future work, we would like to add data augmentations to the training set to randomly offset the signal start time, making this model more generalizable to earthquakes appearing in different segments of the snapshot window.
+
+## 12. Conclusions
 
 
-## 11. Limitations
-
-## 12. Conclusion
 
 
 
