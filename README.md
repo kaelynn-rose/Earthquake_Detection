@@ -3,31 +3,31 @@
 [![DOI](https://zenodo.org/badge/360650102.svg)](https://zenodo.org/badge/latestdoi/360650102)
 
 ## Table of Contents
-[1. Summary](#1.summary)
+[1. Summary](#1.-summary)
 
-[2. Background and Motivation](#2.background-and-motivation)
+[2. Background and Motivation](#2background-and-motivation)
 
-[3. Data](#3.data)
+[3. Data](#3.-data)
 
-[4. Exploratory Data Analysis](#4.exploratory-data-analysis)
+[4. Exploratory Data Analysis](#4-exploratory-data-analysis)
 
-[5. Data Pre-processing and Image Creation for CNN model training](#5.data-pre-processing-and-image-creation-for-cnn-model-training)
+[5. Data Pre-processing and Image Creation for CNN model training](#5-data-pre-processing-and-image-creation-for-cnn-model-training)
 
-[6. Earthquake Detection & Characterization using Convolutional Neural Networks (CNNs)](#6.earthquake-detection-&-characterization-using-convolutional-neural-networks-(cnns))
+[6. Earthquake Detection & Characterization using Convolutional Neural Networks (CNNs)](#6-earthquake-detection-&-characterization-using-convolutional-neural-networks-(cnns))
 
-[7. Earthquake Detection & Characterization using Long-Short Term Memory (LSTM) networks](#7.earthquake-detection-&-characterization-using-long-short-term-memory-(lstm)-networks)
+[7. Earthquake Detection & Characterization using Long-Short Term Memory (LSTM) networks](#7-earthquake-detection-&-characterization-using-long-short-term-memory-(lstm)-networks)
 
-[8. Model comparison](#8.model-comparison)
+[8. Model comparison](#8-model-comparison)
 
-[9. Deployment of earthquake detection API (FastAPI, Pydantic, Docker, ECR, ECS)](#9.deployment)
+[9. Deployment of earthquake detection API (FastAPI, Pydantic, Docker, ECR, ECS)](#9-deployment)
 
-[10. Model Predictions on Live Data (Docker, ECR, Lambda)](#10.model-predictions-on-live-data)
+[10. Model Predictions on Live Data (Docker, ECR, Lambda)](#10-model-predictions-on-live-data)
 
-[11. Live Predictions for seismic station at Kilauea volcano, Hawaii](#11.live-predictions)
+[11. Live Predictions for seismic station at Kilauea volcano, Hawaii](#11-live-predictions)
 
-[12. Limitations and Future Work](#12.limitations-and-future-work)
+[12. Limitations and Future Work](#12-limitations-and-future-work)
 
-[13. Conclusions](#13.conclusions)
+[13. Conclusions](#13-conclusions)
 
 
 ## 1. Summary
