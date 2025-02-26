@@ -243,7 +243,7 @@ Model MSE: 0.51
 Plots of model results for the test set:
 <img src="./plots/lstm_magnitude_results.png" width="1000"/>
 
-As shown on the plots above, the model's MSE and MAE for earthquake magnitude are significantly lower than the baseline. The plot of predicted vs. observed magnitude shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers.
+As shown on the plots above, the model's MSE and MAE for earthquake magnitude are lower than the baseline, though the plot of predicted vs. observed magnitude shows that the predicted vs. observed values do not generally conform to the line of best fit. This indicates that this LSTM model is less suitable for earthquake magnitude prediction than the CNN models above.
 
 The model loss and mean absolute error of the training and validation set during model training are shown below:
 <img src="./plots/lstm_magnitude_training.png" width="700"/>
