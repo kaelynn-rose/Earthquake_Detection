@@ -110,7 +110,7 @@ The classification CNN model was trained to predict earthquake class (_earthquak
 <img src="./plots/cnn_classification_summary.png" width="600"/>
 
 #### Results
-Evaluating the best CNN model on the test set (10k samples) produced the following results:
+Evaluating the best CNN model on the test set (20k samples) produced the following results:
 ```
 Accuracy: 99.01%
 Precision: 99.27%
@@ -120,6 +120,8 @@ F1 Score: 99.05%
 
 Confusion matrix, bar chart, and ROC curve for the test set:
 <img src="./plots/cnn_classification_results2.png" width="900"/>
+
+This CNN model performed extremely well at predicting signal class, with only 76 false positives and 122 false negatives out of a test set of the ~20,000 test signals evaluated.
 
 The model loss and model accuracy of the training and validation set during model training:
 <img src="./plots/cnn_classification_training.png" width="700"/>
@@ -166,7 +168,7 @@ Model MAE: 51.21
 Plots of model results for the test set:
 <img src="./plots/cnn_pwave_results.png" width="1000"/>
 
-As shown on the plots above, the model's MSE and MAE for earthquake P-wave arrival time are significantly lower than the baseline. The plot of predicted vs. observed P-wave arrival time shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers. In the STEAD training set, P-wave arrival times were mostly limited to 100 sample (1 second) labels, so this model retains this limitation in preciseness to its predictions.
+As shown on the plots above, the model's MSE and MAE for earthquake P-wave arrival time are lower than the baseline. The plot of predicted vs. observed P-wave arrival time shows how well the regression model performed visually. The predictions generally fall in the vicinity of the dashed black line of best fit, though the true observed values cause a bucketed effect. In the STEAD training set, P-wave arrival times were mostly limited to 100 sample (1 second) labels, so this model retains this limitation in its predictions.
 
 The model loss and mean absolute error of the training and validation set during model training are shown below:
 <img src="./plots/cnn_pwave_training.png" width="700"/>
@@ -184,7 +186,7 @@ Model MSE: 133.30
 Plots of model results for the test set:
 <img src="./plots/cnn_swave_results.png" width="1000"/>
 
-As shown on the plots above, the model's MSE and MAE for earthquake S-wave arrival time are significantly lower than the baseline. The plot of predicted vs. observed S-wave arrival time shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers, especially at larger observed values of S-wave arrival time.
+As shown on the plots above, the model's MSE and MAE for earthquake S-wave arrival time are lower than the baseline. The plot of predicted vs. observed S-wave arrival time shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers, especially at larger observed values of S-wave arrival time.
 
 The model loss and mean absolute error of the training and validation set during model training are shown below:
 <img src="./plots/cnn_swave_training.png" width="700"/>
@@ -211,7 +213,7 @@ The classification LSTM model was trained to predict earthquake class (_earthqua
 <img src="./plots/lstm_classification_summary.png" width="600"/>
 
 #### Results
-Evaluating the best classification LSTM model on the test set (10k samples) produced the following results:
+Evaluating the best classification LSTM model on the test set (20k samples) produced the following results:
 ```
 Accuracy: 97.06%
 Precision: 97.19%
@@ -221,6 +223,8 @@ F1 Score: 97.17%
 
 Confusion matrix, bar chart, and ROC curve for the test set:
 <img src="./plots/lstm_classification_results2.png" width="1000"/>
+
+This LSTM model performed very well in predicting signal class, though fell slightly short of the metrics achieved by the CNN models discussed above. There were only 292 false positives and 296 false negatives out of the ~20,000 test signals evaluated.
 
 The model loss and model accuracy of the training and validation set during model training:
 <img src="./plots/lstm_classification_training.png" width="900"/>
@@ -261,7 +265,7 @@ Model MSE: 35.93
 Plots of model results for the test set:
 <img src="./plots/lstm_pwave_results.png" width="1000"/>
 
-As shown on the plots above, the model's MSE and MAE for earthquake P-wave arrival time are significantly lower than the baseline. The plot of predicted vs. observed P-wave arrival time shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers. In the STEAD training set, P-wave arrival times were mostly limited to 100 sample (1 second) labels, so this model retains this limitation in preciseness to its predictions.
+As shown on the plots above, the model's MSE and MAE for earthquake P-wave arrival time are lower than the baseline. In the STEAD training set, P-wave arrival times were mostly limited to 100 sample (1 second) labels, so this model retains this limitation in its predictions. The plot of predicted vs. observed P-wave arrival time shows that the predictions are in the vicinity of the best-fit line, but that this model does not perfectly predict the P-wave arrival time values.
 
 The model loss and mean absolute error of the training and validation set during model training are shown below:
 <img src="./plots/lstm_pwave_training.png" width="700"/>
@@ -279,7 +283,7 @@ Model MSE: 107.57
 Plots of model results for the test set:
 <img src="./plots/lstm_swave_results.png" width="1000"/>
 
-As shown on the plots above, the model's MSE and MAE for earthquake S-wave arrival time are significantly lower than the baseline. The plot of predicted vs. observed S-wave arrival time shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers, especially at larger observed values of S-wave arrival time.
+As shown on the plots above, the model's MSE and MAE for earthquake S-wave arrival time are lower than the baseline. The plot of predicted vs. observed S-wave arrival time shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers, especially at larger observed values of S-wave arrival time.
 
 The model loss and mean absolute error of the training and validation set during model training are shown below:
 <img src="./plots/lstm_swave_training.png" width="700"/>
