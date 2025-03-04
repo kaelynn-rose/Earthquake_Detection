@@ -345,7 +345,10 @@ To generate model predictions on the live stream of seismic data in real time, I
 3. Ran the `live_model_predictions/fetch_live_data.py` script to start real-time predictions.
 
 ### 10b. Live predictions
-Here is an example of a live prediction on the seismic station data stream using the Lambda function and earthquake detection API in this repo. This earthquake was a 1.71 magnitude local volcanic earthquake that occurred at 2025-02-18 23:24:15 UTC at Kilauea.
+Here are some examples of live predictions on the seismic station data stream using the Lambda function and earthquake detection API in this repo.
+
+#### Earthquake 1
+This earthquake was a 1.71 magnitude local volcanic earthquake that occurred at 2025-02-18 23:24:15 UTC at Kilauea.
 
 ```
 Predictions for trace HV_AHUD_EHZ_100.0Hz_2025-02-18T23:24:06.940000Z_2025-02-18T23:25:06.940000Z:
@@ -365,9 +368,54 @@ Here is the corresponding earthquake report from the USGS HVO:
 
 The live model prediction gave the signal an 0.8671 probability of being an earthquake, and estimated a magnitude of 1.116, which is near the true magnitude of 1.71.
 
+#### Earthquake 2
+This earthquake was a 0.56 magnitude local volcanic earthquake that occurred at 2025-02-27 19:48:31 UTC at Kilauea.
+
+```
+Predictions for trace HV_AHUD_EHZ_100.0Hz_2025-02-27T19:48:22.120000Z_2025-02-27T19:49:22.120000Z:
+
+class: earthquake,
+class probability: 0.815437317,
+earthquake magnitude: 0.485444099
+```
+
+Below is a slideshow video showing the sequence of signal snapshots in spectrogram image format and predictions surrounding the earthquake.
+
+<img src="./plots/live_data_animation2.gif" width="500"/>
+
+Here is the corresponding earthquake report from the USGS HVO:
+
+<img src="./plots/usgs_hvo_earthquake_report_2.png" width="400"/>
+
+The live model prediction gave the signal an 0.815 probability of being an earthquake, and estimated a magnitude of 0.485, which is near the true magnitude of 0.56.
+
+#### Earthquake 3
+This earthquake was a 2.06 magnitude earthquake that occurred at 2025-02-27 13:01:56 UTC SSW of Pahala, Hawaii.
+
+```
+Predictions for trace HV_AHUD_EHZ_100.0Hz_2025-02-27T13:01:52.120000Z_2025-02-27T13:02:52.120000Z:
+
+class: earthquake,
+class probability: 0.999992967,
+earthquake magnitude: 1.43064
+```
+
+Below is a slideshow video showing the sequence of signal snapshots in spectrogram image format and predictions surrounding the earthquake.
+
+<img src="./plots/live_data_animation3.gif" width="500"/>
+
+Here is the corresponding earthquake report from the USGS HVO:
+
+<img src="./plots/usgs_hvo_earthquake_report_3.png" width="400"/>
+
+The live model prediction gave the signal a 0.999992967 probability of being an earthquake, and estimated a magnitude of 1.43, which is near the true magnitude of 2.06.
+
+
+
+
 ## 11. Limitations and Future Work
 
-A limitation that is visible in the live prediction snapshots above is that the model was trained on a training set of data with an average P-wave arrival time of ~7 seconds from the start of the signal trace, meaning that it is best at predicting signal class when the snapshot shows the earthquake near the start of the 60 second window. When an earthquake appears at the end of the 60 second window, the model often does not recognize it as an earthquake until it approaches the beginning of the snapshot window. In future work, we would like to add data augmentations to the training set to randomly offset the signal start time, making this model more generalizable to earthquakes appearing in different segments of the snapshot window.
+A limitation that is visible in the live prediction videos above is that the model was trained on a training set of data with an average P-wave arrival time of ~7 seconds from the start of the signal trace, meaning that it is best at predicting signal class when the snapshot shows the earthquake near the start of the 60 second window. When an earthquake appears at the end of the 60 second window, the model often does not recognize it as an earthquake until it approaches the beginning of the snapshot window. In future work, we would like to add data augmentations to the training set to randomly offset the signal start time, making this model more generalizable to earthquakes appearing in different segments of the snapshot window.
 
 ## 12. Conclusions
 
