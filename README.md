@@ -411,8 +411,6 @@ Here is the corresponding earthquake report from the USGS HVO:
 The live model prediction gave the signal a 0.999992967 probability of being an earthquake, and estimated a magnitude of 1.43, which is near the true magnitude of 2.06.
 
 
-
-
 ## 11. Limitations and Future Work
 
 A limitation that is visible in the live prediction videos above is that the model was trained on a training set of data with an average P-wave arrival time of ~7 seconds from the start of the signal trace, meaning that it is best at predicting signal class when the snapshot shows the earthquake near the start of the 60 second window. When an earthquake appears at the end of the 60 second window, the model often does not recognize it as an earthquake until it approaches the beginning of the snapshot window. In future work, we would like to add data augmentations to the training set to randomly offset the signal start time, making this model more generalizable to earthquakes appearing in different segments of the snapshot window.
