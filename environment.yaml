@@ -27,5 +27,9 @@ dependencies:
   - pip:
     - h5py==3.12.1
     - obspy==1.4.1
+    - networkx=3.4.2
     - pyasynchat==1.0.4
     - pyasyncore==1.0.4
+    - torch=2.2.2
+    - torchvision=0.17.2
+    - transformers=4.48.1
