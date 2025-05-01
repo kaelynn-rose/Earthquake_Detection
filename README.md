@@ -69,35 +69,35 @@ Each seismic sample has 3 data channels of seismic data in .h5py format along wi
 ## 4. Exploratory Data Analysis
 Exploratory data analysis was performed on the 100,000 signals to inform modeling. An example of a single seismic waveform and spectrogram is shown below, along with a graph of its power spectral density (PSD):
 
-<img src="./plots/waveform_spectrogram_plot.png" width="700"/>
+<img src="./plots/waveform_spectrogram_plot.png?" width="700"/>
 
 Earthquakes in the dataset ranged from -0.36 to 7.9 magnitude with an average magnitude of 1.52, ranged from -3.46 km to 341.74 km source depth with an average of 15.42 km depth, and 0 km to 336.38 km from the receiving seismic station, with an average distance of 50.58 km.
 
-<img src="./plots/mags_depths_distances.png" width="700"/>
+<img src="./plots/mags_depths_distances.png?" width="700"/>
 
 The global distribution of earthquakes in this dataset is shown here:
 
-<img src="./plots/earthquake_map.png" width="700"/>
+<img src="./plots/earthquake_map.png?" width="700"/>
 
 
 The global distribution of seismic stations which detected the earthquakes in the dataset is shown here:
 
-<img src="./plots/station_map.png" width="700"/>
+<img src="./plots/station_map.png?" width="700"/>
 
 
 The distributions of p-wave and s-wave arrival times (in samples, where 1 second is 100 samples) is shown on the plot below. P-wave and s-wave arrival times are important because they help seismologists determine the location of the earthquake. The p-wave arrival times have a high frequency of being selected at time intervals of 100, whereas the s-wave arrival times do not display this pattern as strongly. This may affect the p-wave prediction MSE of the models later on, as the "true" data is picked at intervals of 100 samples / 1 second and the predicted times may be more granular.
 
-![plot](./plots/arrival_times.png)
+![plot](./plots/arrival_times.png?)
 
 ## 5. Data Pre-processing and Image Creation for CNN model training
 To create images for convolutional neural network training, I plotted both the waveform and spectrogram for the vertical component of each seismogram and saved these as separate 3x2 inch images and 3x1 inch images, respectively. I normalized the color axis of the spectrograms to the range of -10 to 25 decibels per Hz for consistency across all signals. The spectrograms were created using an NFFT of 256. This pre-processing and image creation was executed using the `notebooks/data_preprocessing.ipynb` notebook in this repo, using the utilities located in the `earthquake_detection/data_preprocessing.py` module. The pre-processed images were saved in array format to S3.
 
 Here are examples of earthquake and noise waveforms and spectrograms:
 
-![plot](./plots/example_earthquakes_1.png)
-![plot](./plots/example_earthquakes_2.png)
-![plot](./plots/example_noise_1.png)
-![plot](./plots/example_noise_2.png)
+![plot](./plots/example_earthquakes_1.png?)
+![plot](./plots/example_earthquakes_2.png?)
+![plot](./plots/example_noise_1.png?)
+![plot](./plots/example_noise_2.png?)
 
 ## 6. Earthquake Detection & Characterization using Convolutional Neural Networks (CNNs)
 The `model_training_cnn.ipynb` notebook in this repo contains the training results and evaluation for the CNN models used to predict signal class, earthquake magnitude, P-wave arrival time, and S-wave arrival time. Training utilities, such as for the train/val/test split, model evaluation, and plotting results can be found in the `earthquake_detection/training_utils.py` module.
@@ -107,7 +107,7 @@ The model architectures can be found in the `earthquake_detection/architectures.
 ### 6a. Classification CNN - 'Earthquake' or 'Noise' Prediction
 The classification CNN model was trained to predict earthquake class (_earthquake_ or _noise_) using the 100,000 spectrogram images created during the data pre-processing step. A single convolutional layer was chosen for the model architecture because it resulted in excellent predictive power, as well as faster training and inference speed than multiple convolutional layers.
 
-<img src="./plots/cnn_classification_summary.png" width="600"/>
+<img src="./plots/cnn_classification_summary.png?" width="600"/>
 
 #### Results
 Evaluating the best CNN model on the test set (20k samples) produced the following results:
@@ -119,17 +119,17 @@ F1 Score: 99.05%
 ```
 
 Confusion matrix, bar chart, and ROC curve for the test set:
-<img src="./plots/cnn_classification_results2.png" width="900"/>
+<img src="./plots/cnn_classification_results2.png?" width="900"/>
 
 This CNN model performed extremely well at predicting signal class, with only 76 false positives and 122 false negatives out of a test set of the ~20,000 test signals evaluated.
 
 The model loss and model accuracy of the training and validation set during model training:
-<img src="./plots/cnn_classification_training.png" width="700"/>
+<img src="./plots/cnn_classification_training.png?" width="700"/>
 
 ### 6b. Regression CNN - Earthquake Magnitude Prediction
 A regression CNN model was trained to predict earthquake magnitude using the ~50,000 earthquake spectrogram images created during the data pre-processing step. A single convolutional layer was chosen for the model architecture because it resulted in good predictive power, as well as faster training and inference speed than multiple convolutional layers.
 
-<img src="./plots/cnn_magnitude_summary.png" width="600"/>
+<img src="./plots/cnn_magnitude_summary.png?" width="600"/>
 
 #### Results
 Evaluating the best CNN model on the test set (10k samples) produced the following results:
@@ -142,18 +142,18 @@ Model MAE: 0.29
 ```
 
 Plots of model results for the test set:
-<img src="./plots/cnn_magnitude_results2.png" width="1000"/>
+<img src="./plots/cnn_magnitude_results2.png?" width="1000"/>
 
 As shown on the plots above, the model's MSE and MAE for earthquake magnitude are significantly lower than the baseline. The plot of predicted vs. observed magnitude shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers.
 
 The model loss and mean absolute error of the training and validation set during model training are shown below:
-<img src="./plots/cnn_magnitude_training.png" width="700"/>
+<img src="./plots/cnn_magnitude_training.png?" width="700"/>
 
 
 ### 6c. Regression CNN - P-Wave and S-Wave Arrival Time Prediction
 A regression CNN model was trained to predict earthquake P-wave and S-wave arrival times, using the ~50,000 earthquake waveform images created during the data pre-processing step. A single convolutional layer was chosen for the model architecture because it resulted in good predictive power, as well as faster training and inference speed than multiple convolutional layers.
 
-<img src="./plots/cnn_pwave_summary.png" width="600"/>
+<img src="./plots/cnn_pwave_summary.png?" width="600"/>
 
 #### Results: P-wave arrival time
 Evaluating the best CNN model on the test set (10k samples) produced the following results:
@@ -166,12 +166,12 @@ Model MAE: 51.21
 ```
 
 Plots of model results for the test set:
-<img src="./plots/cnn_pwave_results.png" width="1000"/>
+<img src="./plots/cnn_pwave_results.png?" width="1000"/>
 
 As shown on the plots above, the model's MSE and MAE for earthquake P-wave arrival time are lower than the baseline. The plot of predicted vs. observed P-wave arrival time shows how well the regression model performed visually. The predictions generally fall in the vicinity of the dashed black line of best fit, though the true observed values cause a bucketed effect. In the STEAD training set, P-wave arrival times were mostly limited to 100 sample (1 second) labels, so this model retains this limitation in its predictions.
 
 The model loss and mean absolute error of the training and validation set during model training are shown below:
-<img src="./plots/cnn_pwave_training.png" width="700"/>
+<img src="./plots/cnn_pwave_training.png?" width="700"/>
 
 #### Results: S-wave arrival time
 Evaluating the best CNN model on the test set (10k samples) produced the following results:
@@ -184,12 +184,12 @@ Model MSE: 133.30
 ```
 
 Plots of model results for the test set:
-<img src="./plots/cnn_swave_results.png" width="1000"/>
+<img src="./plots/cnn_swave_results.png?" width="1000"/>
 
 As shown on the plots above, the model's MSE and MAE for earthquake S-wave arrival time are lower than the baseline. The plot of predicted vs. observed S-wave arrival time shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers, especially at larger observed values of S-wave arrival time.
 
 The model loss and mean absolute error of the training and validation set during model training are shown below:
-<img src="./plots/cnn_swave_training.png" width="700"/>
+<img src="./plots/cnn_swave_training.png?" width="700"/>
 
 
 ## 7. Earthquake Detection & Characterization using Long-Short Term Memory (LSTM) networks
@@ -205,12 +205,12 @@ Preliminary testing showed that the full 6000 sample signals of the STEAD datase
 
 Here is an example of a signal (gray) with its calculated envelope (dark red) and P-wave and s-wave arrival times shown. Note how the P-wave and S-wave arrivals correspond with a sharp increase in slope of the envelope:
 
-![plot](./plots/lstm_seismic_signal_envelope.png)
+![plot](./plots/lstm_seismic_signal_envelope.png?)
 
 ### 7a. Classification LSTM - 'Earthquake' or 'Noise' Prediction
 The classification LSTM model was trained to predict earthquake class (_earthquake_ or _noise_) using the 100,000  signal envelope vectors created during the data pre-processing step.
 
-<img src="./plots/lstm_classification_summary.png" width="600"/>
+<img src="./plots/lstm_classification_summary.png?" width="600"/>
 
 #### Results
 Evaluating the best classification LSTM model on the test set (20k samples) produced the following results:
@@ -222,17 +222,17 @@ F1 Score: 97.17%
 ```
 
 Confusion matrix, bar chart, and ROC curve for the test set:
-<img src="./plots/lstm_classification_results2.png" width="1000"/>
+<img src="./plots/lstm_classification_results2.png?" width="1000"/>
 
 This LSTM model performed very well in predicting signal class, though fell slightly short of the metrics achieved by the CNN models discussed above. There were only 292 false positives and 296 false negatives out of the ~20,000 test signals evaluated.
 
 The model loss and model accuracy of the training and validation set during model training:
-<img src="./plots/lstm_classification_training.png" width="900"/>
+<img src="./plots/lstm_classification_training.png?" width="900"/>
 
 ### 7b. Regression LSTM - Earthquake Magnitude, P-Wave, and S-Wave Prediction
 A regression LSTM model was trained to predict earthquake magnitude, P-wave arrival time, and S-wave arrival time, using the ~50,000 earthquake signal envelope vectors created during the data pre-processing step.
 
-<img src="./plots/lstm_magnitude_summary.png" width="700"/>
+<img src="./plots/lstm_magnitude_summary.png?" width="700"/>
 
 #### Results: Earthquake magntiude prediction
 Evaluating the best LSTM model on the test set (10k samples) produced the following results:
@@ -245,12 +245,12 @@ Model MSE: 0.51
 ```
 
 Plots of model results for the test set:
-<img src="./plots/lstm_magnitude_results.png" width="1000"/>
+<img src="./plots/lstm_magnitude_results.png?" width="1000"/>
 
 As shown on the plots above, the model's MSE and MAE for earthquake magnitude are lower than the baseline, though the plot of predicted vs. observed magnitude shows that the predicted vs. observed values do not generally conform to the line of best fit. This indicates that this LSTM model is less suitable for earthquake magnitude prediction than the CNN models above.
 
 The model loss and mean absolute error of the training and validation set during model training are shown below:
-<img src="./plots/lstm_magnitude_training.png" width="700"/>
+<img src="./plots/lstm_magnitude_training.png?" width="700"/>
 
 #### Results: P-wave arrival time
 Evaluating the best LSTM model on the test set (10k samples) produced the following results:
@@ -263,12 +263,12 @@ Model MSE: 35.93
 ```
 
 Plots of model results for the test set:
-<img src="./plots/lstm_pwave_results.png" width="1000"/>
+<img src="./plots/lstm_pwave_results.png?" width="1000"/>
 
 As shown on the plots above, the model's MSE and MAE for earthquake P-wave arrival time are lower than the baseline. In the STEAD training set, P-wave arrival times were mostly limited to 100 sample (1 second) labels, so this model retains this limitation in its predictions. The plot of predicted vs. observed P-wave arrival time shows that the predictions are in the vicinity of the best-fit line, but that this model does not perfectly predict the P-wave arrival time values.
 
 The model loss and mean absolute error of the training and validation set during model training are shown below:
-<img src="./plots/lstm_pwave_training.png" width="700"/>
+<img src="./plots/lstm_pwave_training.png?" width="700"/>
 
 #### Results: S-wave arrival time
 Evaluating the best LSTM model on the test set (10k samples) produced the following results:
@@ -281,19 +281,19 @@ Model MSE: 107.57
 ```
 
 Plots of model results for the test set:
-<img src="./plots/lstm_swave_results.png" width="1000"/>
+<img src="./plots/lstm_swave_results.png?" width="1000"/>
 
 As shown on the plots above, the model's MSE and MAE for earthquake S-wave arrival time are lower than the baseline. The plot of predicted vs. observed S-wave arrival time shows how well the regression model performed visually, with the predictions generally falling around the dashed black line of best fit, though there are some larger outliers, especially at larger observed values of S-wave arrival time.
 
 The model loss and mean absolute error of the training and validation set during model training are shown below:
-<img src="./plots/lstm_swave_training.png" width="700"/>
+<img src="./plots/lstm_swave_training.png?" width="700"/>
 
 ## 8. Model comparison
 #### Classification model comparison:
-<img src="./plots/classifier_comparison.png" width="585"/>
+<img src="./plots/classifier_comparison.png?" width="585"/>
 
 #### Regression model comparison:
-<img src="./plots/regression_comparison.png" width="1000"/>
+<img src="./plots/regression_comparison.png?" width="1000"/>
 
 Overall, the CNN models performed best on predicting signal class and earthquake magntiude, while the LSTM models performed best at predicting P-wave and S-wave arrival times. Both types of models outperformed the baseline metrics, which are the metrics produced by simply predicting the most common signal class in the training set (for the classification problem) or the average value of the training set (for the regression problem).
 
@@ -303,7 +303,7 @@ Since for this project I was most interested in signal class and earthquake magn
 I completed the following steps to deploy the CNN models for real-time prediction:
 
 1. Designed and built an API using Python's FastAPI, with Pydantic for payload/response validation and Uvicorn for serving. The API accepts a 6000-sample (60 second) signal vector and optional sampling frequency as a payload, and returns the predicted singal class (_earthquake_ or _noise_) and the earthquake magnitude if the signal is predicted to be an earthquake. The API applies pre-processing steps to transform the input from a signal vector to a spectrogram image of the correct size, and applies post-processing steps to the response. This API See `deployments/serving` in this repo for API code.
-<img src="./plots/api_successful.png" width="1000"/>
+<img src="./plots/api_successful.png?" width="1000"/>
 
 2. Packaged the API into a Docker container. See `deployments/Dockerfile` for code.
 
@@ -330,11 +330,11 @@ I selected the Hawaiian Volcano Observatory ("HV") network because it has statio
 
 The USGS Hawaiian Volcano Observatory map shows seismometers (black triangles) and recent earthquakes (circles) at Kilauea volcano. This map and earthquake report list is available at https://www.usgs.gov/volcanoes/kilauea?date=2week&inst=101740:
 
-<img src="./plots/kilauea_map.png" width="1000"/>
+<img src="./plots/kilauea_map.png?" width="1000"/>
 
 The map below shows the location of the AHUD station, located southeast of Kilauea's summit caldera, along the east rift zone:
 
-<img src="./plots/station_AHUD.png" width="1000"/>
+<img src="./plots/station_AHUD.png?" width="1000"/>
 
 The `live_model_predictions/fetch_live_data.py` script reads in the live stream of seismic data, taking snapshots of the data in 6000-sample (60 second) intervals, with a sliding window of 60 samples (6 seconds). The data snapshots are automatically uploaded to an AWS S3 bucket.
 
@@ -364,7 +364,7 @@ Below is a slideshow video showing the sequence of signal snapshots in spectrogr
 
 Here is the corresponding earthquake report from the USGS HVO:
 
-<img src="./plots/usgs_hvo_earthquake_report_1.png" width="400"/>
+<img src="./plots/usgs_hvo_earthquake_report_1.png?" width="400"/>
 
 The live model prediction gave the signal an 0.8671 probability of being an earthquake, and estimated a magnitude of 1.116, which is near the true magnitude of 1.71.
 
@@ -385,7 +385,7 @@ Below is a slideshow video showing the sequence of signal snapshots in spectrogr
 
 Here is the corresponding earthquake report from the USGS HVO:
 
-<img src="./plots/usgs_hvo_earthquake_report_2.png" width="400"/>
+<img src="./plots/usgs_hvo_earthquake_report_2.png?" width="400"/>
 
 The live model prediction gave the signal an 0.815 probability of being an earthquake, and estimated a magnitude of 0.485, which is near the true magnitude of 0.56.
 
@@ -406,7 +406,7 @@ Below is a slideshow video showing the sequence of signal snapshots in spectrogr
 
 Here is the corresponding earthquake report from the USGS HVO:
 
-<img src="./plots/usgs_hvo_earthquake_report_3.png" width="400"/>
+<img src="./plots/usgs_hvo_earthquake_report_3.png?" width="400"/>
 
 The live model prediction gave the signal a 0.999992967 probability of being an earthquake, and estimated a magnitude of 1.43, which is near the true magnitude of 2.06.
 
