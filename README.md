@@ -205,7 +205,7 @@ Preliminary testing showed that the full 6000 sample signals of the STEAD datase
 
 Here is an example of a signal (gray) with its calculated envelope (dark red) and P-wave and s-wave arrival times shown. Note how the P-wave and S-wave arrivals correspond with a sharp increase in slope of the envelope:
 
-![plot](./plots/lstm_seismic_signal_envelope.png?)
+<img src="./plots/lstm_seismic_signal_envelope.png?" width="900"/>
 
 ### 7a. Classification LSTM - 'Earthquake' or 'Noise' Prediction
 The classification LSTM model was trained to predict earthquake class (_earthquake_ or _noise_) using the 100,000  signal envelope vectors created during the data pre-processing step.
