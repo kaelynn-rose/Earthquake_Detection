@@ -200,7 +200,7 @@ Preliminary testing showed that the full 6000 sample signals of the STEAD datase
 1. Using the same 100,000 signal dataset as for the CNN models above, applied a 1-50 Hz Butterworth bandpass filter to each signal to reduce environmental noise
 2. Applied a Hilbert transform to get the positive signal envelope (a smooth curve outlining the positive extremes of the signal)
 3. Calculated the 2-second rolling mean of the envelope
-4. De-meaned the rolling avermean by subtracting the overall mean
+4. De-meaned the rolling average by subtracting the overall mean
 5. Resampled the envelope to 300 samples from the original 6000 samples
 
 Here is an example of a signal (gray) with its calculated envelope (dark red) and P-wave and s-wave arrival times shown. Note how the P-wave and S-wave arrivals correspond with a sharp increase in slope of the envelope:
